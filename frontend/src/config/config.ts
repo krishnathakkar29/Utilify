@@ -1,3 +1,3 @@
 export const BACKEND_FLASK_URL =
-"https://modular-sold-refused-namibia.trycloudflare.com" 
+  "https://reception-poultry-ec-booking.trycloudflare.com";
 // || "http://localhost:5000";
