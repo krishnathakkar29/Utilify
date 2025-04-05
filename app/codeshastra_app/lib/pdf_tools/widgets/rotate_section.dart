@@ -2,9 +2,7 @@ import 'dart:io';
 import 'package:codeshastra_app/pdf_tools/services/pdf_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:open_file_plus/open_file_plus.dart';
-// import 'package:open_file_plus/open_file_plus.dart';
-// import 'package:pdf_tools_app/services/pdf_api_service.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 
 class RotateSection extends StatefulWidget {
@@ -99,6 +97,8 @@ class _RotateSectionState extends State<RotateSection> {
 
   @override
   Widget build(BuildContext context) {
+    // backgroundColor:
+    // Theme.of(context).primaryColorDark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -106,13 +106,24 @@ class _RotateSectionState extends State<RotateSection> {
         children: [
           Text(
             'Rotate PDF File',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
-            icon: const Icon(Icons.file_upload),
-            label: const Text('Select PDF'),
+            icon: const Icon(Icons.file_upload, color: Colors.black, size: 20),
+            label: const Text(
+              'Select PDF',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
             onPressed: _isLoading ? null : _pickFile,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 15),
@@ -136,7 +147,11 @@ class _RotateSectionState extends State<RotateSection> {
           const SizedBox(height: 20),
           Text(
             'Select Rotation Angle (Clockwise):',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 10),
           DropdownButtonFormField<int>(

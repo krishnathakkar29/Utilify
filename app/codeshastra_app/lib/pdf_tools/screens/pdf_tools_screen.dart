@@ -16,18 +16,21 @@ class PdfToolsScreen extends StatefulWidget {
 class _PdfToolsScreenState extends State<PdfToolsScreen> {
   @override
   Widget build(BuildContext context) {
+    // backgroundColor:
+    // Theme.of(context).primaryColorDark;
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColorDark,
         appBar: AppBar(
           title: const Text('PDF Power Tools'),
           centerTitle: true,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: Theme.of(context).primaryColor,
           elevation: 0,
           bottom: TabBar(
             indicatorColor: Theme.of(context).colorScheme.primary,
             labelColor: Theme.of(context).colorScheme.primary,
-            unselectedLabelColor: Colors.white54,
+            unselectedLabelColor: Colors.black,
             tabs: const [
               Tab(icon: Icon(Icons.merge_type), text: 'Merge'),
               Tab(icon: Icon(Icons.splitscreen), text: 'Split'),
@@ -35,6 +38,7 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
             ],
           ),
         ),
+
         body: const TabBarView(
           children: [MergeSection(), SplitSection(), RotateSection()],
         ),

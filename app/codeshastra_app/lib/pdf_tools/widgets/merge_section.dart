@@ -99,16 +99,28 @@ class _MergeSectionState extends State<MergeSection> {
         children: [
           Text(
             'Merge PDF Files',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
-            icon: const Icon(Icons.file_upload),
-            label: const Text('Select PDFs (2 or more)'),
+            icon: const Icon(Icons.file_upload, color: Colors.black, size: 20),
+            label: const Text(
+              'Select PDFs (2 or more)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
             onPressed: _isLoading ? null : _pickFiles,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 15),
+              backgroundColor: Theme.of(context).primaryColor,
             ),
           ),
           const SizedBox(height: 15),
@@ -116,7 +128,7 @@ class _MergeSectionState extends State<MergeSection> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor.withOpacity(0.5),
+                color: Theme.of(context).primaryColor.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -124,8 +136,10 @@ class _MergeSectionState extends State<MergeSection> {
                 children: [
                   Text(
                     'Selected Files (${_selectedFiles.length}):',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -138,7 +152,11 @@ class _MergeSectionState extends State<MergeSection> {
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
                         child: Text(
                           '• ${p.basename(_selectedFiles[index].path)}',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       );
@@ -152,11 +170,18 @@ class _MergeSectionState extends State<MergeSection> {
             const Center(child: CircularProgressIndicator())
           else
             ElevatedButton.icon(
-              icon: const Icon(Icons.merge_type),
-              label: const Text('Merge Files'),
+              icon: const Icon(Icons.merge_type, color: Colors.black, size: 20),
+              label: const Text(
+                'Merge Files',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               onPressed: _selectedFiles.length < 2 ? null : _mergeFiles,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
+                backgroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),
@@ -164,7 +189,11 @@ class _MergeSectionState extends State<MergeSection> {
           if (_errorMessage != null)
             Text(
               _errorMessage!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
               textAlign: TextAlign.center,
             ),
           if (_successMessage != null)

@@ -120,7 +120,7 @@ class _ColorPaletteState extends State<ColorPalette> {
                   'Color Palette Generator',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -199,9 +199,11 @@ class _ColorPaletteState extends State<ColorPalette> {
         children: [
           Text(
             'Extracted Colors',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 27,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 15),
           GridView.builder(

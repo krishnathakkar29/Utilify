@@ -1,7 +1,11 @@
-import 'dart:ffi';
+// import 'dart:ffi';
 
+import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
+import 'package:codeshastra_app/image_to_pdf.dart';
 import 'package:codeshastra_app/models/block_data.dart';
+import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
+import 'package:codeshastra_app/qr_code.dart';
 import 'package:codeshastra_app/utility/sizedbox_util.dart';
 import 'package:flutter/material.dart';
 
@@ -30,38 +34,60 @@ class _HomeScreenState extends State<HomeScreen> {
     BuildContext context,
     List data,
     int maincolor,
+    String name,
   ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder:
-          (context) => ScanOptionsBottomSheet(data: data, maincolor: maincolor),
+          (context) => ScanOptionsBottomSheet(
+            data: data,
+            maincolor: maincolor,
+            name: name,
+          ),
     );
   }
 
   // final List<BlockData> convert = [
   final convert = [
     {
-      'title': 'Documents',
+      'title': 'Merge Pdf',
       'subtitle': 'Scan multiple documents',
-      'icon': Icons.copy_outlined,
+      'icon': Icons.merge,
       'color': 0xFFEFEACC,
+      'keyword': 'convert',
     },
     {
-      'title': 'ID card',
+      'title': 'Split Pdf',
       'subtitle': 'Scan ID cards',
-      'icon': Icons.credit_card_outlined,
+      'icon': Icons.splitscreen,
       'color': 0xFFEFEACC,
+      'keyword': 'convert',
+    },
+    {
+      'title': 'Rotate Pdf',
+      'subtitle': 'Scan ID cards',
+      'icon': Icons.rotate_90_degrees_ccw_rounded,
+      'color': 0xFFEFEACC,
+      'keyword': 'convert',
     },
   ];
 
   final scan = [
     {
-      'title': 'Documents',
-      'subtitle': 'Scan multiple documents',
-      'icon': Icons.copy_outlined,
+      'title': 'QrCode Generator',
+      'subtitle': 'Create and Scan qrcode',
+      'icon': Icons.qr_code,
       'color': 0xFFFFF3C2,
+      'keyword': 'qr',
+    },
+    {
+      'title': 'Barcode Generator',
+      'subtitle': 'Create and Scan barcode',
+      'icon': Icons.qr_code,
+      'color': 0xFFFFF3C2,
+      'keyword': 'bar',
     },
     // {
     //   'title': 'ID card',
@@ -83,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'subtitle': 'Scan multiple documents',
       'icon': Icons.copy_outlined,
       'color': 0xFFE6F4D8,
+      'keyword': 'docu',
     },
     // {
     //   'title': 'ID card',
@@ -104,6 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'subtitle': 'Scan multiple documents',
       'icon': Icons.copy_outlined,
       'color': 0xFFFFF0D1,
+      'keyword': 'docu',
     },
     // {
     //   'title': 'ID card',
@@ -243,7 +271,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: HomeScreen.cardPurple,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
-                          showScanOptionsBottomSheet(context, convert, 1);
+                          showScanOptionsBottomSheet(
+                            context,
+                            convert,
+                            1,
+                            'Convert',
+                          );
                         },
                       ),
                     ),
@@ -258,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: HomeScreen.cardTeal,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
-                          showScanOptionsBottomSheet(context, scan, 2);
+                          showScanOptionsBottomSheet(context, scan, 2, 'Scan');
                         },
                       ),
                     ),
@@ -279,7 +312,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: HomeScreen.cardPink,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
-                          showScanOptionsBottomSheet(context, pt, 3);
+                          showScanOptionsBottomSheet(
+                            context,
+                            pt,
+                            3,
+                            'Productivity Tools',
+                          );
                         },
                       ),
                     ),
@@ -294,7 +332,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: HomeScreen.cardBlue,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
-                          showScanOptionsBottomSheet(context, ai_tools, 4);
+                          showScanOptionsBottomSheet(
+                            context,
+                            ai_tools,
+                            4,
+                            'AI Tools',
+                          );
                         },
                       ),
                     ),
@@ -371,7 +414,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(width: 16),
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ImageToPdfScreen()),
+              );
+            },
             heroTag: 'addButton',
             backgroundColor: HomeScreen.accentYellow,
             child: const Icon(Icons.add, color: Colors.black),
@@ -488,10 +536,12 @@ class DocumentThumbnail extends StatelessWidget {
 class ScanOptionsBottomSheet extends StatelessWidget {
   final List data;
   final int maincolor;
+  final String name;
 
   const ScanOptionsBottomSheet({
     required this.data,
     required this.maincolor,
+    required this.name,
     Key? key,
   }) : super(key: key);
 
@@ -539,8 +589,8 @@ class ScanOptionsBottomSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 // Title
-                const Text(
-                  'Scan',
+                Text(
+                  name,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -577,12 +627,44 @@ class ScanOptionsBottomSheet extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) {
                 final item = data[index];
-                return ScanOption(
-                  title: item['title'],
-                  subtitle: item['subtitle'],
-                  icon: item['icon'],
-                  color: item['color'],
-                  // maincolor:item['maincolor']
+                // Inside ScanOptionsBottomSheet class, replace the GestureDetector's onTap:
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context); // Close the bottom sheet first
+                    Future.delayed(Duration(milliseconds: 100), () {
+                      // Add a small delay before navigation
+                      if (item['keyword'] == 'convert') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PdfToolsScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'qr') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QRCodeGenerator(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'bar') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BarcodeGenerator(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'ai') {
+                        Navigator.pushNamed(context, '/ai');
+                      }
+                    });
+                  },
+                  child: ScanOption(
+                    title: item['title'],
+                    subtitle: item['subtitle'],
+                    icon: item['icon'],
+                    color: item['color'],
+                  ),
                 );
               },
             ),

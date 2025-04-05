@@ -3,9 +3,7 @@ import 'package:codeshastra_app/pdf_tools/services/pdf_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:open_file_plus/open_file_plus.dart';
-// import 'package:open_file_plus/open_file_plus.dart';
-// import 'package:pdf_tools_app/services/pdf_api_service.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 
 class SplitSection extends StatefulWidget {
@@ -128,6 +126,8 @@ class _SplitSectionState extends State<SplitSection> {
 
   @override
   Widget build(BuildContext context) {
+    // backgroundColor:
+    // Theme.of(context).primaryColorDark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -137,13 +137,28 @@ class _SplitSectionState extends State<SplitSection> {
           children: [
             Text(
               'Split PDF File',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              icon: const Icon(Icons.file_upload),
-              label: const Text('Select PDF'),
+              icon: const Icon(
+                Icons.file_upload,
+                color: Colors.black,
+                size: 20,
+              ),
+              label: Text(
+                'Select PDF',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               onPressed: _isLoading ? null : _pickFile,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 15),
@@ -167,10 +182,31 @@ class _SplitSectionState extends State<SplitSection> {
             const SizedBox(height: 20),
             TextFormField(
               controller: _startPageController,
-              decoration: const InputDecoration(
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+              ), // text color
+              decoration: InputDecoration(
                 labelText: 'Start Page',
+                labelStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ), // label color
                 hintText: 'e.g., 1',
-                prefixIcon: Icon(Icons.first_page),
+                hintStyle: TextStyle(
+                  color: Theme.of(context).primaryColor.withOpacity(0.6),
+                ), // hint color
+                prefixIcon: Icon(
+                  Icons.first_page,
+                  color: Theme.of(context).primaryColor, // icon color
+                  size: 20,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor.withOpacity(0.5),
+                  ),
+                ),
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -184,13 +220,35 @@ class _SplitSectionState extends State<SplitSection> {
                 return null;
               },
             ),
+
             const SizedBox(height: 15),
             TextFormField(
               controller: _endPageController,
-              decoration: const InputDecoration(
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+              ), // text color
+              decoration: InputDecoration(
                 labelText: 'End Page',
-                hintText: 'e.g., 5',
-                prefixIcon: Icon(Icons.last_page),
+                labelStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ), // label color
+                hintText: 'e.g., 1',
+                hintStyle: TextStyle(
+                  color: Theme.of(context).primaryColor.withOpacity(0.6),
+                ), // hint color
+                prefixIcon: Icon(
+                  Icons.last_page,
+                  color: Theme.of(context).primaryColor, // icon color
+                  size: 20,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor.withOpacity(0.5),
+                  ),
+                ),
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -201,10 +259,30 @@ class _SplitSectionState extends State<SplitSection> {
                 if (int.tryParse(value) == null || int.parse(value) <= 0) {
                   return 'Invalid page number';
                 }
-                // Optional: Add cross-field validation in the _splitFile method
                 return null;
               },
             ),
+
+            // TextFormField(
+            //   controller: _endPageController,
+            //   decoration: const InputDecoration(
+            //     labelText: 'End Page',
+            //     hintText: 'e.g., 5',
+            //     prefixIcon: Icon(Icons.last_page),
+            //   ),
+            //   keyboardType: TextInputType.number,
+            //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            //   validator: (value) {
+            //     if (value == null || value.isEmpty) {
+            //       return 'Please enter end page';
+            //     }
+            //     if (int.tryParse(value) == null || int.parse(value) <= 0) {
+            //       return 'Invalid page number';
+            //     }
+            //     // Optional: Add cross-field validation in the _splitFile method
+            //     return null;
+            //   },
+            // ),
             const SizedBox(height: 25),
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
