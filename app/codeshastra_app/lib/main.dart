@@ -7,11 +7,26 @@ import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_maker/main_page.dart';
 import 'package:codeshastra_app/pdf_makerr/main_page.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
+import 'package:codeshastra_app/productivity_tools/countdown_screen.dart';
+import 'package:codeshastra_app/productivity_tools/currency_converter_screen.dart';
+import 'package:codeshastra_app/productivity_tools/pomodoro_timer_sheet.dart';
+import 'package:codeshastra_app/productivity_tools/stopwatch_screen.dart';
+import 'package:codeshastra_app/productivity_tools/timer_screen.dart';
+import 'package:codeshastra_app/productivity_tools/timesheet_screen.dart';
+import 'package:codeshastra_app/productivity_tools/unit_converter_screen.dart';
+import 'package:codeshastra_app/productivity_tools/world_clock.dart';
 import 'package:codeshastra_app/qr_code.dart';
+import 'package:codeshastra_app/random_number_screen.dart';
 import 'package:codeshastra_app/razorpay.dart';
+import 'package:codeshastra_app/uiud_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  tzdata.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   runApp(const MyApp());
 }
 // void main() {

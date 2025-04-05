@@ -1,12 +1,24 @@
 // import 'dart:ffi';
 
+import 'dart:nativewrappers/_internal/vm/lib/async_patch.dart';
+
 import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
+import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
 import 'package:codeshastra_app/models/block_data.dart';
 import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
+import 'package:codeshastra_app/productivity_tools/currency_converter_screen.dart';
+import 'package:codeshastra_app/productivity_tools/pomodoro_timer_sheet.dart';
+import 'package:codeshastra_app/productivity_tools/stopwatch_screen.dart';
+import 'package:codeshastra_app/productivity_tools/timer_screen.dart';
+import 'package:codeshastra_app/productivity_tools/timesheet_screen.dart';
+import 'package:codeshastra_app/productivity_tools/unit_converter_screen.dart';
+import 'package:codeshastra_app/productivity_tools/world_clock.dart';
 import 'package:codeshastra_app/qr_code.dart';
+import 'package:codeshastra_app/random_number_screen.dart';
+import 'package:codeshastra_app/uiud_screen.dart';
 import 'package:codeshastra_app/utility/sizedbox_util.dart';
 import 'package:flutter/material.dart';
 
@@ -53,6 +65,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // final List<BlockData> convert = [
   final convert = [
     {
+      'title': 'Make Pdf',
+      'subtitle': 'Make pdf from uploading images',
+      'icon': Icons.picture_as_pdf,
+      'color': 0xFFEFEACC,
+      'keyword': 'pdf',
+    },
+    {
       'title': 'Merge Pdf',
       'subtitle': 'Scan multiple documents',
       'icon': Icons.merge,
@@ -72,6 +91,20 @@ class _HomeScreenState extends State<HomeScreen> {
       'icon': Icons.rotate_90_degrees_ccw_rounded,
       'color': 0xFFEFEACC,
       'keyword': 'convert',
+    },
+    {
+      'title': 'Excel to Csv',
+      'subtitle': 'Convert excel into csv',
+      'icon': Icons.swap_horiz_outlined,
+      'color': 0xFFEFEACC,
+      'keyword': 'excel',
+    },
+    {
+      'title': 'Csv to Excel',
+      'subtitle': 'Convert csv into excel',
+      'icon': Icons.swap_horiz_outlined,
+      'color': 0xFFEFEACC,
+      'keyword': 'excel',
     },
   ];
 
@@ -97,6 +130,20 @@ class _HomeScreenState extends State<HomeScreen> {
       'color': 0xFFFFF3C2,
       'keyword': 'password',
     },
+    {
+      'title': 'Random Number Generator',
+      'subtitle': 'Generate random numbers',
+      'icon': Icons.numbers,
+      'color': 0xFFFFF3C2,
+      'keyword': 'number',
+    },
+    {
+      'title': 'UUID Generator',
+      'subtitle': 'Generate UUID',
+      'icon': Icons.numbers_rounded,
+      'color': 0xFFFFF3C2,
+      'keyword': 'uuid',
+    },
     // {
     //   'title': 'ID card',
     //   'subtitle': 'Scan ID cards',
@@ -113,11 +160,53 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final pt = [
     {
-      'title': 'Documents',
-      'subtitle': 'Scan multiple documents',
-      'icon': Icons.copy_outlined,
+      'title': 'Timer',
+      'subtitle': 'Keep a Timer',
+      'icon': Icons.timer,
       'color': 0xFFE6F4D8,
-      'keyword': 'docu',
+      'keyword': 'timer',
+    },
+    {
+      'title': 'Pomodoro',
+      'subtitle': 'Keep a focus timer',
+      'icon': Icons.timelapse_rounded,
+      'color': 0xFFE6F4D8,
+      'keyword': 'pomo',
+    },
+    {
+      'title': 'Stopwatch',
+      'subtitle': 'Start a stop watch',
+      'icon': Icons.pause_circle_outline,
+      'color': 0xFFE6F4D8,
+      'keyword': 'stopwatch',
+    },
+    {
+      'title': 'TimeSheet',
+      'subtitle': 'Keep track of your timesheet',
+      'icon': Icons.format_align_center_sharp,
+      'color': 0xFFE6F4D8,
+      'keyword': 'timesheet',
+    },
+    {
+      'title': 'Unit Converter',
+      'subtitle': 'Be accurate with measurements',
+      'icon': Icons.square_foot,
+      'color': 0xFFE6F4D8,
+      'keyword': 'unit',
+    },
+    {
+      'title': 'Currency Converter',
+      'subtitle': 'Convert currencies',
+      'icon': Icons.monetization_on_outlined,
+      'color': 0xFFE6F4D8,
+      'keyword': 'curr',
+    },
+    {
+      'title': 'World Clock',
+      'subtitle': 'Keep track of timezones',
+      'icon': Icons.access_time_filled_rounded,
+      'color': 0xFFE6F4D8,
+      'keyword': 'wclock',
     },
     // {
     //   'title': 'ID card',
@@ -663,11 +752,86 @@ class ScanOptionsBottomSheet extends StatelessWidget {
                             builder: (context) => BarcodeGenerator(),
                           ),
                         );
+                      } else if (item['keyword'] == 'pdf') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageToPdfScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'excel') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ExceltoCsv()),
+                        );
+                      } else if (item['keyword'] == 'number') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RandomNumberScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'uuid') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UuidGeneratorScreen(),
+                          ),
+                        );
                       } else if (item['keyword'] == 'password') {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => PasswordScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'timer') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TimerScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'pomo') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PomodoroTimerScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'curr') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CurrencyConverterScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'unit') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UnitConverterScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'stopwatch') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StopwatchScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'timesheet') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TimesheetScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'wclock') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WorldClockScreen(),
                           ),
                         );
                       }
