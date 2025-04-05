@@ -1,0 +1,13 @@
+Flask
+python-barcode
+qrcode
+dnspython
+pypdf2
+pypdf
+python-docx
+flask-cors
+Pillow
+extcolors
+matplotlib
+pandas
+numpy
