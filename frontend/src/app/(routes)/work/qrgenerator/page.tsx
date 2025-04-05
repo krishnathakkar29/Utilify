@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, FormEvent } from "react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
+import { BACKEND_FLASK_URL } from "@/app/config/config";
 
 const Page: React.FC = () => {
   const [selectedButton, setSelectedButton] = useState<"qr" | "bar" | null>(
@@ -24,15 +25,11 @@ const Page: React.FC = () => {
     if (selectedButton === "bar") {
       const formData = new FormData();
       formData.append("text", inputText);
-      console.log(process.env.BACKEND_FLASK_URL);
       try {
-        const res = await fetch(
-          `https://modular-sold-refused-namibia.trycloudflare.com/generate-barcode`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
+        const res = await fetch(`${BACKEND_FLASK_URL}/generate-barcode`, {
+          method: "POST",
+          body: formData,
+        });
 
         if (!res.ok) console.log("Failed to generate barcode");
         console.log(res);

@@ -7,6 +7,7 @@ import axios from "axios";
 import { Loader2, FilePlus2, FileX, Scissors, File } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { BACKEND_FLASK_URL } from "@/app/config/config";
 
 const PDFSplit = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -60,7 +61,7 @@ const PDFSplit = () => {
       formData.append("end_page", endPage);
 
       const response = await axios.post(
-        `${process.env.BACKEND_FLASK_URL}/split`,
+        `${BACKEND_FLASK_URL}/split`,
         formData,
         {
           responseType: "blob",

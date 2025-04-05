@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Upload, X, Palette, Download, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BACKEND_FLASK_URL } from "@/app/config/config";
 
 interface ColorData {
   hex: string;
@@ -81,14 +82,12 @@ function page() {
     try {
       const formData = new FormData();
       formData.append("image", file);
+      const response = await fetch(`${BACKEND_FLASK_URL}/extract-colors`, {
+        method: "POST",
+        body: formData,
+      });
 
-      const response = await fetch(
-        `${process.env.BACKEND_FLASK_URL}/extract-colors`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      console.log(response);
 
       if (!response.ok) {
         throw new Error("Failed to extract colors");
