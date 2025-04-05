@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, FormEvent } from "react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
-import { BACKEND_FLASK_URL } from "@/app/config/config";
+import { BACKEND_FLASK_URL } from "@/config/config";
 
 const Page: React.FC = () => {
   const [selectedButton, setSelectedButton] = useState<"qr" | "bar" | null>(

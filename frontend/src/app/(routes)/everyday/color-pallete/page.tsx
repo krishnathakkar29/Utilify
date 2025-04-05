@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Upload, X, Palette, Download, Copy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BACKEND_FLASK_URL } from "@/app/config/config";
+import { BACKEND_FLASK_URL } from "@/config/config";
 
 interface ColorData {
   hex: string;

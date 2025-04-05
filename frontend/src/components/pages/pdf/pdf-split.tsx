@@ -7,7 +7,7 @@ import axios from "axios";
 import { Loader2, FilePlus2, FileX, Scissors, File } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { BACKEND_FLASK_URL } from "@/app/config/config";
+import { BACKEND_FLASK_URL } from "@/config/config";
 
 const PDFSplit = () => {
   const [file, setFile] = useState<File | null>(null);
