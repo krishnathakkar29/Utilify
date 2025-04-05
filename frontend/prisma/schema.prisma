@@ -26,6 +26,7 @@ model User {
   updatedAt   DateTime @updatedAt
 
   credit         Int             @default(100)
+  outreachEmails OutreachEmail[]
   userToProjects UserToProject[]
 }
 
@@ -67,6 +68,53 @@ model Commit {
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Company {
+  id             String   @id @default(cuid())
+  name           String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  emailAddresses Email[]
+}
+
+model Email {
+  id           String   @id @default(cuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  emailAddress String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  OutreachEmail OutreachEmail[]
+
+  @@unique([companyId, emailAddress])
+  @@index([companyId, emailAddress])
+}
+
+model OutreachEmail {
+  id          String       @id @default(cuid())
+  subject     String
+  body        String
+  sentAt      DateTime     @default(now())
+  emailId     String
+  recipient   Email        @relation(fields: [emailId], references: [id])
+  userId      String
+  sender      User         @relation(fields: [userId], references: [id])
+  attachments Attachment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Attachment {
+  id              String        @id @default(uuid())
+  outreachEmail   OutreachEmail @relation(fields: [outreachEmailId], references: [id])
+  outreachEmailId String
+  file_name       String
+  file_url        String // URL to file in Supabase Storage
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
