@@ -3,16 +3,18 @@ import React, { useState, FormEvent } from "react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 
 const Page: React.FC = () => {
-  const [selectedButton, setSelectedButton] = useState<"qr" | "bar" | null>(null);
+  const [selectedButton, setSelectedButton] = useState<"qr" | "bar" | null>(
+    null
+  );
   const [inputText, setInputText] = useState<string>("");
   const [submittedText, setSubmittedText] = useState<string>("");
-  const [barcodeImageUrl, setBarcodeImageUrl] = useState<string | null>(null); 
+  const [barcodeImageUrl, setBarcodeImageUrl] = useState<string | null>(null);
 
   const handleButtonClick = (button: "qr" | "bar") => {
     setSelectedButton(button);
     setInputText("");
     setSubmittedText("");
-    setBarcodeImageUrl(null); 
+    setBarcodeImageUrl(null);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -22,15 +24,18 @@ const Page: React.FC = () => {
     if (selectedButton === "bar") {
       const formData = new FormData();
       formData.append("text", inputText);
-console.log(process.env.BACKEND_FLASK_URL)
+      console.log(process.env.BACKEND_FLASK_URL);
       try {
-        const res = await fetch(`${process.env.BACKEND_FLASK_URL}/generate-barcode`, {
-          method: "POST",
-          body: formData,
-        });
+        const res = await fetch(
+          `https://modular-sold-refused-namibia.trycloudflare.com/generate-barcode`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
         if (!res.ok) console.log("Failed to generate barcode");
-
+        console.log(res);
         const blob = await res.blob();
         const imageUrl = URL.createObjectURL(blob);
         setBarcodeImageUrl(imageUrl);

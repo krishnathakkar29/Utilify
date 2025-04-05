@@ -29,7 +29,7 @@ export default function RootLayout({
             <DashboardBreadCrumb />
           </div>
         </header>
-        {children}
+        <div className="px-4 py-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
