@@ -301,7 +301,104 @@ def rotate():
         return response
 
     return send_file(output_path, as_attachment=True)
+length_factors = {
+    "mm": 0.001,
+    "cm": 0.01,
+    "m": 1,
+    "km": 1000,
+    "in": 0.0254,
+    "ft": 0.3048,
+    "yd": 0.9144,
+    "mi": 1609.34
+}
 
+# Conversion factors for volume (to liters)
+volume_factors = {
+    "ml": 0.001,
+    "l": 1,
+    "m3": 1000,
+    "gal": 3.78541,     # US gallon
+    "qt": 0.946353,
+    "pt": 0.473176,
+    "cup": 0.24,
+    "floz": 0.0295735
+}
+
+# Conversion factors for mass (to kilograms)
+mass_factors = {
+    "mg": 0.000001,
+    "g": 0.001,
+    "kg": 1,
+    "ton": 1000,
+    "lb": 0.453592,
+    "oz": 0.0283495
+}
+
+@app.route('/convert_length', methods=['POST'])
+def convert_length():
+    data = request.get_json()
+    value = data['value']
+    from_unit = data['from_unit']
+    to_unit = data['to_unit']
+
+    meters = value * length_factors[from_unit]
+    result = meters / length_factors[to_unit]
+    return jsonify({
+        "result": round(result, 4),
+        "unit": to_unit
+    })
+
+@app.route('/convert_volume', methods=['POST'])
+def convert_volume():
+    data = request.get_json()
+    value = data['value']
+    from_unit = data['from_unit']
+    to_unit = data['to_unit']
+
+    liters = value * volume_factors[from_unit]
+    result = liters / volume_factors[to_unit]
+    return jsonify({
+        "result": round(result, 4),
+        "unit": to_unit
+    })
+
+@app.route('/convert_mass', methods=['POST'])
+def convert_mass():
+    data = request.get_json()
+    value = data['value']
+    from_unit = data['from_unit']
+    to_unit = data['to_unit']
+
+    kg = value * mass_factors[from_unit]
+    result = kg / mass_factors[to_unit]
+    return jsonify({
+        "result": round(result, 4),
+        "unit": to_unit
+    })
+
+@app.route('/convert_temperature', methods=['POST'])
+def convert_temperature():
+    data = request.get_json()
+    value = data['value']
+    from_unit = data['from_unit']
+    to_unit = data['to_unit']
+
+    def to_celsius(val, unit):
+        if unit == "C": return val
+        if unit == "F": return (val - 32) * 5 / 9
+        if unit == "K": return val - 273.15
+
+    def from_celsius(val, unit):
+        if unit == "C": return val
+        if unit == "F": return (val * 9 / 5) + 32
+        if unit == "K": return val + 273.15
+
+    celsius = to_celsius(value, from_unit)
+    result = from_celsius(celsius, to_unit)
+    return jsonify({
+        "result": round(result, 2),
+        "unit": to_unit
+    })
 @app.route('/convert_img', methods=['POST'])
 def convert_image():
     if 'image' not in request.files:
