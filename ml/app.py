@@ -119,6 +119,37 @@ def process_pdfs():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+ALLOWED_VOICES = {
+    "alloy", "ash", "ballad", "coral", "echo",
+    "fable", "onyx", "nova", "sage", "shimmer"
+}
+
+@app.route("/tts", methods=["POST"])
+def generate_speech():
+    data = request.json
+
+    if not data or "text" not in data or "voice" not in data:
+        return jsonify({"error": "Missing 'text' or 'voice' in request"}), 400
+
+    text = data["text"]
+    voice = data["voice"]
+
+    if voice not in ALLOWED_VOICES:
+        return jsonify({"error": f"Invalid voice '{voice}'. Choose from {list(ALLOWED_VOICES)}"}), 400
+
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
+            with client.audio.speech.with_streaming_response.create(
+                model="gpt-4o",  # Or "tts-1-hd" if preferred
+                voice=voice,
+                input=text
+            ) as response:
+                response.stream_to_file(temp_audio_file.name)
+
+            return send_file(temp_audio_file.name, mimetype="audio/mpeg", as_attachment=True, download_name="speech.mp3")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 # Endpoint to handle user questions
 s3=boto3.client('s3')
 S3_BUCKET = os.environ.get("S3_BUCKET", "testusebucket123")
