@@ -23,6 +23,15 @@ class _PdfToolsScreenState extends State<PdfToolsScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColorDark,
         appBar: AppBar(
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
           title: const Text('PDF Power Tools'),
           centerTitle: true,
           backgroundColor: Theme.of(context).primaryColor,

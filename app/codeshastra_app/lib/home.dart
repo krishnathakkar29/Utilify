@@ -1,12 +1,14 @@
 // import 'dart:ffi';
 
-import 'dart:nativewrappers/_internal/vm/lib/async_patch.dart';
+// import 'dart:nativewrappers/_internal/vm/lib/async_patch.dart';
 
 import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
 import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
+import 'package:codeshastra_app/image_converter/screens/image_converter_screen.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
 import 'package:codeshastra_app/models/block_data.dart';
+import 'package:codeshastra_app/notification.dart';
 import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
 import 'package:codeshastra_app/productivity_tools/currency_converter_screen.dart';
@@ -70,6 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
       'icon': Icons.picture_as_pdf,
       'color': 0xFFEFEACC,
       'keyword': 'pdf',
+    },
+    {
+      'title': 'Image Conversions',
+      'subtitle': 'Convert images in different formats',
+      'icon': Icons.image,
+      'color': 0xFFEFEACC,
+      'keyword': 'image',
     },
     {
       'title': 'Merge Pdf',
@@ -258,57 +267,89 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.question_mark,
-                        size: 20,
-                        color: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                backgroundColor: Colors.white,
+                                title: const Text('Help'),
+                                content: const Text(
+                                  'This is the help dialog.',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Close'),
+                                  ),
+                                ],
+                              ),
+                        );
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.question_mark,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    Stack(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            shape: BoxShape.circle,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotificationPage(),
                           ),
-                          child: const Icon(
-                            Icons.notifications_outlined,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Positioned(
-                          right: 5,
-                          top: 5,
-                          child: Container(
-                            width: 16,
-                            height: 16,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
+                        );
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Center(
-                              child: Text(
-                                '5',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                            child: const Icon(
+                              Icons.notifications_outlined,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Positioned(
+                            right: 5,
+                            top: 5,
+                            child: Container(
+                              width: 16,
+                              height: 16,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  '5',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -832,6 +873,13 @@ class ScanOptionsBottomSheet extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => WorldClockScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'iamge') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageConverterScreen(),
                           ),
                         );
                       }

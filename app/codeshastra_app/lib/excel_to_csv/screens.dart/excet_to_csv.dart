@@ -538,8 +538,14 @@ class _ExceltoCsvState extends State<ExceltoCsv> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
+        ),
         title: const Text('File Converter'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).primaryColorDark,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: Center(

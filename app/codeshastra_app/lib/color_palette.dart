@@ -52,7 +52,7 @@ class _ColorPaletteState extends State<ColorPalette> {
       var request = http.MultipartRequest(
         'POST',
         Uri.parse(
-          'https://modular-sold-refused-namibia.trycloudflare.com/extract-colors',
+          'https://reception-poultry-ec-booking.trycloudflare.com/extract-colors',
         ), // Use 10.0.2.2 for Android emulator
       );
 

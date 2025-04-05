@@ -42,7 +42,12 @@ class _RandomNumberScreenState extends State<RandomNumberScreen> {
     return Scaffold(
       backgroundColor: theme.primaryColorDark,
       appBar: AppBar(
-        leading: Icon(Icons.arrow_back, color: theme.primaryColor),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
+        ),
         centerTitle: true,
         title: const Text('Random Number Generator'),
         backgroundColor: theme.primaryColor,

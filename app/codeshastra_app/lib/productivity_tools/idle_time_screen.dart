@@ -109,6 +109,15 @@ class _IdleTimeScreenState extends State<IdleTimeScreen> {
                 ? Colors.orange[900]?.withOpacity(0.5)
                 : theme.primaryColorDark, // Visual feedback for idle
         appBar: AppBar(
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
           title: const Text('Idle Time Detector'),
           backgroundColor: theme.appBarTheme.backgroundColor,
           foregroundColor: theme.appBarTheme.foregroundColor,

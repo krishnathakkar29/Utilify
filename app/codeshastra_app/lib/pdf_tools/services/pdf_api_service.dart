@@ -10,7 +10,7 @@ class PdfApiService {
   // If running Flask locally and using Android Emulator: 'http://10.0.2.2:5000'
   // If running Flask locally and using iOS Simulator or physical device: Use your machine's local IP address (e.g., 'http://192.168.1.100:5000')
   final String _baseUrl =
-      'https://modular-sold-refused-namibia.trycloudflare.com/'; // <-- CHANGE THIS
+      'https://reception-poultry-ec-booking.trycloudflare.com/'; // <-- CHANGE THIS
   final Dio _dio = Dio();
 
   Future<String?> _downloadFile(Response response, String operation) async {

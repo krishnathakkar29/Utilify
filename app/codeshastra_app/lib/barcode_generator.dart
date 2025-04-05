@@ -32,7 +32,7 @@ class _BarcodeGeneratorState extends State<BarcodeGenerator> {
       var request = http.MultipartRequest(
         'POST',
         Uri.parse(
-          'https://modular-sold-refused-namibia.trycloudflare.com/generate-barcode',
+          'https://reception-poultry-ec-booking.trycloudflare.com/generate-barcode',
         ),
       );
 

@@ -407,9 +407,11 @@ class _ImageToPdfScreenState extends State<ImageToPdfScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColorDark,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
         ),
         backgroundColor: Theme.of(context).primaryColorDark,
         title: const Text(

@@ -2,7 +2,10 @@ import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
 import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
 import 'package:codeshastra_app/home.dart';
+import 'package:codeshastra_app/image_converter/screens/image_converter_screen.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
+import 'package:codeshastra_app/notes_taking/notes_module.dart';
+import 'package:codeshastra_app/notes_taking/providers/notes_provider.dart';
 import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_maker/main_page.dart';
 import 'package:codeshastra_app/pdf_makerr/main_page.dart';
@@ -20,14 +23,27 @@ import 'package:codeshastra_app/random_number_screen.dart';
 import 'package:codeshastra_app/razorpay.dart';
 import 'package:codeshastra_app/uiud_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:codeshastra_app/notes_taking/services/shared_preferences_helper.dart';
+import 'package:codeshastra_app/notes_taking/services/notes_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferencesHelper.init();
   tzdata.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
-  runApp(const MyApp());
+  runApp(
+    // Wrap the entire app with the provider
+    ChangeNotifierProvider(
+      create:
+          (context) => NotesProvider(), // Create an instance of your provider
+      child: const MyApp(),
+    ),
+  );
+  // runApp(const MyApp());
 }
 // void main() {
 //   runApp(
@@ -69,7 +85,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomeScreen(), // MyHomePage(title: 'Flutter Demo Home Page'),
+      home: NotesModule(), // MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }

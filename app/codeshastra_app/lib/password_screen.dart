@@ -31,7 +31,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
   // Use your machine's local IP if testing on a physical device on the same network
   // Use your deployed server URL if applicable
   final String _apiBaseUrl =
-      'https://modular-sold-refused-namibia.trycloudflare.com';
+      'https://reception-poultry-ec-booking.trycloudflare.com';
 
   // --- API Call Functions ---
   Future<void> _generatePassword() async {
@@ -146,7 +146,12 @@ class _PasswordScreenState extends State<PasswordScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColorDark,
       appBar: AppBar(
-        leading: Icon(Icons.arrow_back, color: theme.primaryColorDark),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
+        ),
         centerTitle: true,
         title: Text(
           'Password Tools',

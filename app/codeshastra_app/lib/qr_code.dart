@@ -32,7 +32,7 @@ class _QRCodeGeneratorState extends State<QRCodeGenerator> {
       var request = http.MultipartRequest(
         'POST',
         Uri.parse(
-          'https://modular-sold-refused-namibia.trycloudflare.com/generate-qrcode',
+          'https://reception-poultry-ec-booking.trycloudflare.com/generate-qrcode',
         ),
       );
 

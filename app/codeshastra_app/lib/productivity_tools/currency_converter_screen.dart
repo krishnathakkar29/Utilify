@@ -267,7 +267,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
   ];
 
   final String _apiUrl =
-      'https://modular-sold-refused-namibia.trycloudflare.com/convert_currency';
+      'https://reception-poultry-ec-booking.trycloudflare.com/convert_currency';
 
   Future<void> _convertCurrency() async {
     final String amountStr = _amountController.text.trim();
@@ -353,9 +353,19 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
     return Scaffold(
       backgroundColor: theme.primaryColorDark,
       appBar: AppBar(
-        title: const Text('Currency Converter'),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        foregroundColor: theme.appBarTheme.foregroundColor,
+        centerTitle: true,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
+        ),
+        title: Text(
+          'Currency Converter',
+          style: TextStyle(color: Theme.of(context).primaryColor),
+        ),
+        backgroundColor: theme.primaryColorDark,
+        // foregroundColor: theme.appBarTheme.foregroundColor,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -381,7 +391,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
                   ],
                   decoration: const InputDecoration(
                     labelText: 'Amount',
-                    prefixIcon: Icon(Icons.attach_money),
+                    prefixIcon: Icon(Icons.money_outlined),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -416,7 +426,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
                     icon: Icon(
                       Icons.swap_vert,
                       size: 32,
-                      color: theme.primaryColor,
+                      color: theme.primaryColorDark,
                     ),
                     tooltip: 'Swap Countries',
                   ),
@@ -456,8 +466,14 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
                             width: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                          : const Icon(Icons.currency_exchange),
-                  label: Text(_isLoading ? 'Converting...' : 'Convert'),
+                          : const Icon(
+                            Icons.currency_exchange,
+                            color: Colors.black,
+                          ),
+                  label: Text(
+                    _isLoading ? 'Converting...' : 'Convert',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
                 const SizedBox(height: 30),
 
@@ -501,7 +517,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
                           _result,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontSize: 28,
-                            color: theme.primaryColor,
+                            color: theme.primaryColorDark,
                           ),
                           textAlign: TextAlign.center,
                         ),

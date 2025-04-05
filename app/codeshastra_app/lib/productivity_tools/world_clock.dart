@@ -127,6 +127,12 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
     return Scaffold(
       backgroundColor: theme.primaryColorDark,
       appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
+        ),
         centerTitle: true,
         title: Text(
           'World Clock',
