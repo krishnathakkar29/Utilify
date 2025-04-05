@@ -5,6 +5,22 @@ import tempfile
 from werkzeug.utils import secure_filename
 from PIL import Image
 import io
+from flask import Flask, request, send_file, jsonify
+from pdf2docx import Converter
+import os
+import tempfile
+from flask import Flask, request, jsonify, send_file
+from docx2pdf import convert
+import tempfile
+import os
+import uuid
+from flask import Flask, request, jsonify, send_file, after_this_request
+from docx2pdf import convert
+import tempfile
+import os
+import uuid
+import shutil
+import requests
 import os
 from flask import Flask, request, jsonify, send_file, after_this_request,send_from_directory
 import os
@@ -24,8 +40,11 @@ from matplotlib import gridspec
 import base64
 import random
 import uuid
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
+api_key = os.getenv('CURRENCY_FREAKS')
 # Ensure temporary directory exists
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "temp_uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -142,17 +161,75 @@ os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 @app.route('/')
 def home():
     return jsonify({"message": "Excel-CSV Converter API is running!"})
+@app.route('/pdf-to-docx', methods=['POST'])
+def pdf_to_docx():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
 
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
+            file.save(temp_pdf.name)
+            pdf_path = temp_pdf.name
+
+        output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".docx").name
+        try:
+            cv = Converter(pdf_path)
+            cv.convert(output_path, start=0, end=None)
+            cv.close()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        finally:
+            os.unlink(pdf_path)  # Delete temp PDF file
+
+        return send_file(output_path, as_attachment=True, download_name="converted.docx")
+
+
+@app.route('/docx-to-pdf', methods=['POST'])
+def docx_to_pdf():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        temp_dir = tempfile.mkdtemp()
+        docx_path = os.path.join(temp_dir, f"{uuid.uuid4()}.docx")
+        pdf_path = os.path.join(temp_dir, f"{uuid.uuid4()}.pdf")
+
+        file.save(docx_path)
+        convert(docx_path, pdf_path)
+
+        if not os.path.exists(pdf_path):
+            return jsonify({"error": "PDF conversion failed"}), 500
+
+        @after_this_request
+        def cleanup(response):
+            try:
+                shutil.rmtree(temp_dir)
+            except Exception as e:
+                app.logger.warning(f"Cleanup failed: {e}")
+            return response
+
+        return send_file(pdf_path, as_attachment=True, download_name="converted.pdf")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 @app.route("/generate-random", methods=["POST"])
 def api_generate_random():
-    data = request.json()
+    data = request.json
     start = int(data.get("start", 10))
     end = int(data.get("end", 100))
     result = random.randrange(start,end)
     return jsonify({"random": result})
 @app.route("/generate-uuids", methods=["POST"])
 def api_generate_uuids():
-    data = request.json()
+    data = request.json
     num = int(data.get("num", 10))
     uuids = [str(uuid.uuid4()) for _ in range(num)]
     return jsonify({"uuids": uuids})
@@ -403,6 +480,7 @@ def password_strength_feedback(entropy):
         return "Strong 🟢"
     else:
         return "Very Strong 🔵"
+currency = {'Afganistan': 'AFN', 'Albania': 'ALL', 'Alergia': 'DZD', 'American Samoa': 'USD', 'Andorra': 'EUR', 'Angola': 'AOA', 'Anguilla': 'XCD', 'Antigua and Barbuda': 'XCD', 'Argentina': 'ARS', 'Armenia': 'AMD', 'Aruba': 'AWG', 'Australia': 'AUD', 'Austria': 'EUR', 'Azerbaijan': 'AZN', 'Bahamas': 'BSD', 'Bahrain': 'BHD', 'Bangladesh': 'BDT', 'Barbados': 'BBD', 'Belarus': 'BYN', 'Belgium': 'EUR', 'Belize': 'BZD', 'Benin': 'CFA', 'Bermuda': 'BMD', 'Bhutan': 'BTN', 'Bolivia': 'BOV', 'Bonaire': 'BES', 'Boznia and herzegovina': 'BAM', 'Botswana': 'BWP', 'Bouvet': 'NOK', 'Brazil': 'BRL', 'British Indian Ocean Terriotory': 'USD', 'Brunei Daraussalam': 'BND', 'Bulgaria': 'BGN', 'Burkina': 'CFA', 'Burundi': 'BIF', 'Cape Verde': 'CVE', 'Cambodia': 'KHR', 'Cameroon': 'CFA', 'Canada': 'CAD', 'Cayman Islands': 'KYD', 'Central African Repulic': 'CFA', 'Chad': 'CFA', 'Chile': 'CLP', 'China': 'CNY', 'Christmas Island': 'AUD', 'Cocos Islands': 'AUD', 'Colombia': 'COP', 'Comoros': 'KMF', 'The Democratic Repulic of Congo': 'CDF', 'The Cook Islands': 'NZD', 'Costa Rica': 'CRC', 'Croatia': 'HRK', 'Cuba': 'CUP', 'CuraÇao': 'ANG', 'Cyprus': 'EUR', 'Czech Repulic': 'CZK', 'Ivory Coast': 'CFA', 'Denmark': 'DKK', 'Djibouti': 'DJF', 'Dominica': 'XCD', 'The Dominican Republic': 'DOP', 'Equador': 'USD', 'Egypt': 'EGP', 'El Salvador': 'USD', 'Equatorial Guniea': 'CFA', 'Eritrea': 'ERN', 'Estonia': 'EUR', 'Ethipia': 'ETB', 'The Falkland': 'FKP', 'The Faroe': 'DKK', 'Fiji': 'FJD', 'Finland': 'EUR', 'France': 'EUR', 'French Guiana': 'EUR', 'French Polynesia': 'CFP', 'French Southern Territores': 'EUR', 'Gabon': 'CFA', 'Gambia': 'GMD', 'Georgia': 'GEL', 'Germany': 'EUR', 'Ghana': 'GHS', 'Gibraltar': 'GIP', 'Greece': 'EUR', 'Greenland': 'DKK', 'Grenada': 'XCD', 'Guadeloupe': 'EUR', 'Guam': 'USD', 'Guatemala': 'GTQ', 'Guernsey': 'GBP', 'Guniea': 'GNF', 'Guinea-Bisaau': 'CFA', 'Guyana': 'GYD', 'Haiti': 'USD', 'Holy See': 'EUR', 'Honduras': 'HNL', 'Hong Kong': 'HKD', 'Hungary': 'HUF', 'Iceland': 'ISK', 'India': 'INR', 'Indonesia': 'IDR', 'Iran': 'IRR', 'Iraq': 'IQD', 'Ireland': 'EUR', 'Isle of man': 'GBP', 'Israel': 'ILS', 'Italy': 'EUR', 'Jamaica': 'JMD', 'Japan': 'JPY', 'Jersey': 'GBP', 'Jordan': 'JOD', 'Kazakstan': 'KZT', 'Kenya': 'KES', 'Kiribati': 'AUD', 'North Korea': 'KPW', 'South Korea': 'KRW', 'Kuwait': 'KWD', 'Kyrgyzstan': 'KGS', 'Lao': 'LAK', 'Latvia': 'EUR', 'Lebanon': 'LBP', 'Lesotho': 'ZAR', 'Liberia': 'LRD', 'Libya': 'LYD', 'Liechensteain': 'CHF', 'Lithuania': 'EUR', 'Luxembourg': 'EUR', 'Macao': 'MOP', 'Madagascar': 'MGA', 'Malawi': 'MWK', 'Malaysia': 'MYR', 'Maldives': 'MVR', 'Mali': 'CFA', 'Malta': 'EUR', 'The Marshall Islands': 'USD', 'Martinque': 'EUR', 'Mauritania': 'MRU', 'Mauritius': 'MUR', 'Mayotte': 'EUR', 'Mexico': 'MXV', 'Micronesia': 'USD', 'Moldova': 'MDL', 'Monaco': 'EUR', 'Mongolia': 'MNT', 'Montenegro': 'EUR', 'Montserrat': 'XCD', 'Morocco': 'MAD', 'Mozambique': 'MZN', 'Myanmar': 'MMK', 'Namibia': 'ZAR', 'Nauru': 'AUD', 'Nepal': 'NPR', 'The Netherlands': 'EUR', 'New Caledonia': 'CFP', 'New Zealand': 'NZD', 'Nicaragua': 'NIO', 'Niger': 'CFA', 'Nigeria': 'NGN', 'Niue': 'NZD', 'Nolfolf Island': 'AUD', 'Northern Mariana Islands': 'USD', 'Norway': 'NOK', 'Oman': 'OMR', 'Pakistan': 'PKR', 'Palau': 'USD', 'Panama': 'USD', 'Papua New Guinea': 'PGK', 'Paraguay': 'PYG', 'Peru': 'PEN', 'Philippines': 'PHP', 'Pitcairn': 'NZD', 'Poland': 'PLN', 'Portugal': 'EUR', 'Puerto Rico': 'USD', 'Qatar': 'QAR', 'North Macedonia': 'MKD', 'Romania': 'RON', 'Russia': 'RUB', 'Rwanda': 'RWF', 'Réunion': 'EUR', 'Saint Barts': 'EUR', 'Saint Helena': 'SHP', 'Saint Kitts and Nevis': 'XCD', 'Saint Lucia': 'XCD', 'Saint Martin': 'EUR', 'Saint Pierre and Miquelon': 'EUR', 'Saint Vincent and the Grenadines': 'XCD', 'Samoa': 'WST', 'San Marino': 'EUR', 'Sao Tome and Principe': 'STN', 'Saudi Arabia': 'SAR', 'Senegal': 'CFA', 'Serbia': 'RSD', 'Seychelles': 'SCR', 'Sierra Leone': 'SLL', 'Singapore': 'SGD', 'Sint Maarten': 'ANG', 'Slovakia': 'EUR', 'Slovenia': 'EUR', 'Solomon Islands': 'SBD', 'Somalia': 'SOS', 'South Africa': 'ZAR', 'South Sudan': 'SSP', 'Spain': 'EUR', 'Sri Lanka': 'LKR', 'Sudan': 'SDG', 'Suriname': 'SRD', 'Svalbard and Jan Mayen': 'NOK', 'Swaziland': 'SZL', 'Sweden': 'SEK', 'Switzerland': 'CHF', 'Syria': 'SYP', 'Taiwan': 'TWD', 'Tajikistan': 'TJS', 'Tanzania': 'TZS', 'Thailand': 'THB', 'Timor-leste': 'USD', 'Togo': 'CFA', 'Tokelau': 'NZD', 'Tonga': 'TOP', 'Trinidad and Tobago': 'TTD', 'Tunisia': 'TND', 'Turkey': 'TRY', 'Turkmenistan': 'TMT', 'Turks and Caicos Islands': 'USD', 'Tuvalu': 'AUD', 'Uganda': 'UGX', 'Ukraine': 'UAH', 'United Arab Emirates': 'UAE', 'United Kingdom': 'GBP', 'United States Minor Outlying Islands': 'USD', 'United States of America': 'USD', 'Uruguay': 'UYU', 'Uzbekistan': 'UZS', 'Vanuatu': 'VUV', 'Venezuela': 'VEF', 'Vietnam': 'VND', 'British Virgin Islands': 'USD', 'US Virgin Islands': 'USD', 'Wallis and Futuna': 'CFP', 'Western Sahara': 'MAD', 'Yemen': 'YER', 'Zambia': 'ZMW', 'Zimbabwe': 'ZWL', 'Åland Islands': 'EUR'}
 
 # ------------------- Routes -------------------
 
@@ -435,9 +513,10 @@ def api_check_password():
         "strength_feedback": strength
     })
 
-@app.route("/ping", methods=["GET"])
+@app.route("/ping", methods=["POST"])
 def api_ping():
     host = request.json.get("host")
+    print(host)
     if not host:
         return jsonify({"error": "No host provided"}), 400
     param = "-n" if platform.system().lower() == "windows" else "-c"
@@ -447,9 +526,9 @@ def api_ping():
     except subprocess.CalledProcessError as e:
         return jsonify({"error": e.output}), 500
 
-@app.route("/dns-lookup", methods=["GET"])
+@app.route("/dns-lookup", methods=["POST"])
 def api_dns_lookup():
-    domain = request.json.get("domain")
+    domain = request.json.get("host")
     if not domain:
         return jsonify({"error": "No domain provided"}), 400
     try:
@@ -458,18 +537,18 @@ def api_dns_lookup():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/ip-lookup", methods=["GET"])
+@app.route("/ip-lookup", methods=["POST"])
 def api_ip_lookup():
-    domain = request.json.get("domain")
+    domain = request.json.get("host")
     if not domain:
         return jsonify({"error": "No domain provided"}), 400
     try:
-        ip = socket.gethostbyname(domain)
+        ip = socket.gethostbyaddr(domain)
         return jsonify({"ip": ip})
     except socket.gaierror as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/traceroute", methods=["GET"])
+@app.route("/traceroute", methods=["POST"])
 def api_traceroute():
     host = request.json.get("host")
     if not host:
@@ -480,7 +559,46 @@ def api_traceroute():
         return jsonify({"result": output})
     except subprocess.CalledProcessError as e:
         return jsonify({"error": e.output}), 500
+@app.route('/convert_currency', methods=['POST'])
+def currency_convert():
+    data = request.json
+    country_from = data.get('from')
+    country_to = data.get('to')
+    amount = data.get('amount')
 
+    if not all([country_from, country_to, amount]):
+        return jsonify({'error': 'Missing required fields: from, to, amount'}), 400
+
+    try:
+        amount = float(amount)
+        from_code = currency.get(country_from)
+        to_code = currency.get(country_to)
+
+        if not from_code or not to_code:
+            return jsonify({'error': 'Invalid country name'}), 400
+
+        symbols = f"{from_code},{to_code}"
+        url = f"https://api.currencyfreaks.com/v2.0/rates/latest?apikey={api_key}&symbols={symbols}"
+
+        response = requests.get(url)
+        data = response.json()
+        print(data)
+        rate_from = float(data['rates'][from_code])
+        rate_to = float(data['rates'][to_code])
+
+        final_amount = amount * rate_to / rate_from
+        print(final_amount)
+        return jsonify({
+            'from': country_from,
+            'to': country_to,
+            'amount': amount,
+            'converted': round(final_amount, 2),
+            'from_code': from_code,
+            'to_code': to_code
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 @app.route("/generate-barcode", methods=["POST"])
 def api_generate_barcode():
     # Get text from form-data
@@ -505,10 +623,10 @@ def api_generate_qrcode():
 
     try:
         img = qrcode.make(text)
-        qr_path = "qrcode.png"
+        qr_path = "ml/qrcode.png"
         img.save(qr_path)
 
-        return send_file(qr_path, mimetype='image/png')
+        return send_file('qrcode.png', mimetype='image/png')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
