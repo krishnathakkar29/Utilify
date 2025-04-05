@@ -11,3 +11,5 @@ extcolors
 matplotlib
 pandas
 numpy
+pdf2docx
+docx2pdf
