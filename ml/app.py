@@ -1,6 +1,9 @@
 from flask import Flask, request, send_file, jsonify
 import pandas as pd
 import os
+import random
+import boto3
+from flask import Flask, request, jsonify
 import tempfile
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -12,18 +15,14 @@ import tempfile
 from flask import Flask, request, jsonify, send_file
 from docx2pdf import convert
 import tempfile
-import os
 import uuid
 from flask import Flask, request, jsonify, send_file, after_this_request
 from docx2pdf import convert
 import tempfile
-import os
 import uuid
 import shutil
 import requests
-import os
 from flask import Flask, request, jsonify, send_file, after_this_request,send_from_directory
-import os
 import PyPDF2
 from pypdf import PdfWriter, PdfReader
 from docx import Document
@@ -42,10 +41,21 @@ import random
 import uuid
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-import os
 import requests
 from openai import OpenAI
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify
+from PyPDF2 import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import google.generativeai as genai
+from langchain_community.vectorstores import FAISS
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.chains.question_answering import load_qa_chain
+from langchain.prompts import PromptTemplate
+from dotenv import load_dotenv
+import os
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
@@ -59,7 +69,117 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 def ensure_uploads_dir():
     if not os.path.exists('uploads'):
         os.makedirs('uploads')
+def get_pdf_text(pdf_files):
+    text = ""
+    for pdf in pdf_files:
+        pdf_reader = PdfReader(pdf)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
 
+# Function to split text into chunks
+def get_text_chunks(text):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
+    return text_splitter.split_text(text)
+
+# Function to create FAISS vector store
+def get_vector_store(text_chunks):
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+    vector_store.save_local("faiss_index")
+
+# Function to create the conversational chain
+def get_conversational_chain():
+    prompt_template = """
+    Answer the question as detailed as possible from the provided context. 
+    If the answer is not in the context, respond with: "Answer is not available in the context."
+    
+    Context:\n {context}\n
+    Question:\n{question}\n
+    Answer:
+    """
+
+    model = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.3)
+    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+    return load_qa_chain(model, chain_type="stuff", prompt=prompt)
+
+# Endpoint to process PDFs
+@app.route("/process_pdfs", methods=["POST"])
+def process_pdfs():
+    try:
+        if "files" not in request.files:
+            return jsonify({"error": "No file part"}), 400
+        
+        pdf_files = request.files.getlist("files")
+        raw_text = get_pdf_text(pdf_files)
+        text_chunks = get_text_chunks(raw_text)
+        get_vector_store(text_chunks)
+
+        return jsonify({"message": "Processing complete"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Endpoint to handle user questions
+s3=boto3.client('s3')
+S3_BUCKET = os.environ.get("S3_BUCKET", "testusebucket123")
+@app.route("/upload", methods=["POST"])
+def upload_and_get_presigned_url():
+    # 1) Validate file
+    if "file" not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+    file_obj = request.files["file"]
+    if file_obj.filename == "":
+        return jsonify({"error": "No file selected"}), 400
+
+    # 2) Validate expiration
+    expiration = request.form.get("expiration", type=int)
+    if expiration is None or expiration <= 0:
+        return jsonify({"error": "Invalid expiration; must be a positive integer"}), 400
+
+    # 3) Generate a unique object key
+    object_key = f"obj{random.randint(1, 100_000)}_{file_obj.filename}"
+
+    try:
+        # 4) Upload to S3
+        s3.upload_fileobj(file_obj, S3_BUCKET, object_key)
+
+        # 5) Generate presigned URL
+        presigned_url = s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": S3_BUCKET, "Key": object_key},
+            ExpiresIn=expiration,
+        )
+
+    except Exception as e:
+        # Log the exception in real code!
+        return jsonify({"error": "S3 operation failed", "details": str(e)}), 500
+
+    # 6) Return the URL
+    return jsonify({"presigned_url": presigned_url}), 200
+@app.route("/ask_question", methods=["POST"])
+def ask_question():
+    try:
+        data = request.get_json()
+        user_question = data.get("question", "")
+        
+        if not user_question:
+            return jsonify({"error": "No question provided"}), 400
+
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        
+        # ✅ Fix: Enable safe deserialization
+        vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+        
+        docs = vector_store.similarity_search(user_question)
+
+        chain = get_conversational_chain()
+        response = chain({"input_documents": docs, "question": user_question}, return_only_outputs=True)
+
+        return jsonify({"response": response["output_text"]}), 200
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # Prints full error in Flask console
+        return jsonify({"error": str(e)}), 500
 def mergePDF(pdf_list):
     merger = PdfWriter()
     for pdf in pdf_list:
@@ -587,7 +707,7 @@ import dns.resolver
 import secrets
 import string
 import math
-import os
+
 
 
 def generate_secure_password(length=20, use_symbols=True):
