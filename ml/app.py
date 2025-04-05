@@ -389,8 +389,8 @@ def password_strength_feedback(entropy):
 
 @app.route("/generate-password", methods=["POST"])
 def api_generate_password():
-    length = int(request.args.get("length", 20))
-    use_symbols = request.args.get("symbols", "true").lower() == "true"
+    length = int(request.json.get("length", 20))
+    use_symbols = request.json.get("symbols", "true").lower() == "true"
     try:
         password = generate_secure_password(length, use_symbols)
         return jsonify({"password": password})
