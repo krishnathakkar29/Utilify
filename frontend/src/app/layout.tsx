@@ -5,6 +5,8 @@ import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/wrappers/theme-provider";
 import { CompilerProvider } from "@/context/compiler-context";
+import QueryProviderWrapper from "@/components/wrappers/query-provider";
+import { ProjectProvider } from "@/context/project-context";
 
 const space = Space_Grotesk({ subsets: ["latin"] });
 
@@ -22,25 +24,28 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`${space.className}`}>
-          <CompilerProvider>
-
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-            >
-            {children}
-            <Toaster
-              position="bottom-right"
-              expand={true}
-              richColors
-              theme="dark"
-              closeButton
-              style={{ marginBottom: "20px" }}
-              />
-          </ThemeProvider>
-              </CompilerProvider>
+          <QueryProviderWrapper>
+            <CompilerProvider>
+              <ProjectProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="dark"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {children}
+                  <Toaster
+                    position="bottom-right"
+                    expand={true}
+                    richColors
+                    theme="dark"
+                    closeButton
+                    style={{ marginBottom: "20px" }}
+                  />
+                </ThemeProvider>
+              </ProjectProvider>
+            </CompilerProvider>
+          </QueryProviderWrapper>
         </body>
       </html>
     </ClerkProvider>
