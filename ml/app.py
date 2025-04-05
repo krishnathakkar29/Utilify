@@ -29,6 +29,14 @@ from docx import Document
 from flask_cors import CORS
 from PIL import Image
 import tempfile
+from flask import Flask, request, jsonify
+import psycopg2
+import psycopg2.extras
+import re
+import google.generativeai as genai
+import os
+from urllib.parse import urlparse
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_file
 from PIL import Image, ImageDraw
 import extcolors
@@ -102,7 +110,419 @@ def get_conversational_chain():
     model = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.3)
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     return load_qa_chain(model, chain_type="stuff", prompt=prompt)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable not set")
 
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-1.5-pro')
+
+# Function to parse PostgreSQL connection URL
+def parse_db_url(db_url):
+    result = urlparse(db_url)
+    return {
+        "dbname": result.path[1:],
+        "user": result.username,
+        "password": result.password,
+        "host": result.hostname,
+        "port": result.port or "5432",
+        "sslmode": "require"
+    }
+
+# Function to connect to the database with connection details
+def get_db_connection(db_config):
+    return psycopg2.connect(**db_config)
+
+# Get all table names
+@app.route("/tables", methods=["GET"])
+def get_table_names():
+    try:
+        db_url = request.args.get('db_url')
+        if not db_url:
+            return jsonify({"error": "Missing db_url parameter"}), 400
+        
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor()
+        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        tables = [row[0] for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return jsonify({"tables": tables})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get schema information for all tables
+@app.route("/schema", methods=["GET"])
+def get_schema():
+    try:
+        db_url = request.args.get('db_url')
+        if not db_url:
+            return jsonify({"error": "Missing db_url parameter"}), 400
+            
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # Get all tables
+        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        tables = [row[0] for row in cur.fetchall()]
+
+        schema_info = {}
+        for table in tables:
+            # Get column information
+            cur.execute(f"SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = %s", (table,))
+            columns = [{"name": row["column_name"], "type": row["data_type"], "nullable": row["is_nullable"] == "YES"} for row in cur.fetchall()]
+            
+            # Get primary key information
+            cur.execute("""
+                SELECT kcu.column_name 
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                WHERE tc.constraint_type = 'PRIMARY KEY' 
+                AND tc.table_name = %s
+            """, (table,))
+            primary_keys = [row[0] for row in cur.fetchall()]
+            
+            # Get foreign key information
+            cur.execute("""
+                SELECT
+                    kcu.column_name,
+                    ccu.table_name AS foreign_table_name,
+                    ccu.column_name AS foreign_column_name
+                FROM information_schema.table_constraints AS tc
+                JOIN information_schema.key_column_usage AS kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                JOIN information_schema.constraint_column_usage AS ccu
+                    ON ccu.constraint_name = tc.constraint_name
+                WHERE tc.constraint_type = 'FOREIGN KEY' 
+                AND tc.table_name = %s
+            """, (table,))
+            foreign_keys = [{"column": row[0], "references_table": row[1], "references_column": row[2]} for row in cur.fetchall()]
+            
+            schema_info[table] = {
+                "columns": columns,
+                "primary_keys": primary_keys,
+                "foreign_keys": foreign_keys
+            }
+
+        cur.close()
+        conn.close()
+        return jsonify(schema_info)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Get all records from a table
+@app.route("/<string:table_name>", methods=["GET"])
+def get_all_records(table_name):
+    try:
+        db_url = request.args.get('db_url')
+        if not db_url:
+            return jsonify({"error": "Missing db_url parameter"}), 400
+            
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(f"SELECT * FROM {table_name}")
+        data = [dict(row) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# New endpoint to generate SQL based on natural language
+@app.route("/generate-sql", methods=["POST"])
+def generate_sql():
+    try:
+        data = request.json
+        if not data or 'db_url' not in data or 'query' not in data:
+            return jsonify({"error": "Missing required parameters: db_url and query"}), 400
+        
+        db_url = data['db_url']
+        natural_language_query = data['query']
+        
+        # Get schema information
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # Get all tables
+        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        tables = [row[0] for row in cur.fetchall()]
+
+        schema_info = {}
+        for table in tables:
+            # Get column information
+            cur.execute(f"SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = %s", (table,))
+            columns = [{"name": row["column_name"], "type": row["data_type"], "nullable": row["is_nullable"] == "YES"} for row in cur.fetchall()]
+            
+            # Get primary key information
+            cur.execute("""
+                SELECT kcu.column_name 
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                WHERE tc.constraint_type = 'PRIMARY KEY' 
+                AND tc.table_name = %s
+            """, (table,))
+            primary_keys = [row[0] for row in cur.fetchall()]
+            
+            # Get foreign key information
+            cur.execute("""
+                SELECT
+                    kcu.column_name,
+                    ccu.table_name AS foreign_table_name,
+                    ccu.column_name AS foreign_column_name
+                FROM information_schema.table_constraints AS tc
+                JOIN information_schema.key_column_usage AS kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                JOIN information_schema.constraint_column_usage AS ccu
+                    ON ccu.constraint_name = tc.constraint_name
+                WHERE tc.constraint_type = 'FOREIGN KEY' 
+                AND tc.table_name = %s
+            """, (table,))
+            foreign_keys = [{"column": row[0], "references_table": row[1], "references_column": row[2]} for row in cur.fetchall()]
+            
+            schema_info[table] = {
+                "columns": columns,
+                "primary_keys": primary_keys,
+                "foreign_keys": foreign_keys
+            }
+
+        cur.close()
+        conn.close()
+        
+        # Format schema information for the prompt
+        schema_text = "Database Schema:\n"
+        for table, info in schema_info.items():
+            schema_text += f"Table: {table}\n"
+            schema_text += "  Columns:\n"
+            for col in info["columns"]:
+                nullable = "NULL" if col["nullable"] else "NOT NULL"
+                schema_text += f"    - {col['name']} ({col['type']}, {nullable})\n"
+            
+            if info["primary_keys"]:
+                schema_text += "  Primary Keys:\n"
+                for pk in info["primary_keys"]:
+                    schema_text += f"    - {pk}\n"
+            
+            if info["foreign_keys"]:
+                schema_text += "  Foreign Keys:\n"
+                for fk in info["foreign_keys"]:
+                    schema_text += f"    - {fk['column']} references {fk['references_table']}({fk['references_column']})\n"
+            
+            schema_text += "\n"
+        
+        # Create prompt for Gemini
+        prompt = f"""
+You are an expert SQL query generator. Based on the following database schema, generate a PostgreSQL SQL query that answers the user's question.
+Follow these rules:
+1. Only generate the raw SQL query, nothing else
+2. Use proper table and column names as shown in the schema
+3. Include appropriate JOINs if the query requires data from multiple tables
+4. Return the query without backticks, markdown formatting, or any explanations
+5. Be mindful of the relationships between tables
+
+{schema_text}
+
+User Question: {natural_language_query}
+
+SQL Query:
+"""
+        
+        # Get response from Gemini
+        response = model.generate_content(prompt)
+        
+        # Clean the response to extract only the SQL query
+        sql_query = response.text.strip()
+        
+        # Remove any markdown code formatting if present
+        sql_query = re.sub(r'^```sql\s*', '', sql_query)
+        sql_query = re.sub(r'\s*```$', '', sql_query)
+        
+        # Try to execute the query to validate it
+        try:
+            conn = get_db_connection(db_config)
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(sql_query)
+            
+            # If SELECT query, return the results
+            if sql_query.strip().lower().startswith("select"):
+                results = [dict(row) for row in cur.fetchall()]
+                conn.commit()
+                cur.close()
+                conn.close()
+                return jsonify({
+                    "sql": sql_query,
+                    "results": results,
+                    "rows_affected": len(results)
+                })
+            else:
+            # For non-SELECT queries, capture the affected rows
+                rows_affected = cur.rowcount
+                
+                # Try to determine which table was modified
+                table_name = None
+                # Extract table name from the query (basic parsing)
+                query_lower = sql_query.lower()
+                if "update " in query_lower:
+                    # Extract table name from UPDATE query
+                    match = re.search(r'update\s+([^\s]+)', query_lower)
+                    if match:
+                        table_name = match.group(1)
+                elif "insert into " in query_lower:
+                    # Extract table name from INSERT query
+                    match = re.search(r'insert\s+into\s+([^\s\(]+)', query_lower)
+                    if match:
+                        table_name = match.group(1)
+                elif "delete from " in query_lower:
+                    # Extract table name from DELETE query
+                    match = re.search(r'delete\s+from\s+([^\s]+)', query_lower)
+                    if match:
+                        table_name = match.group(1)
+                
+                # If we identified a table, return its contents
+                if table_name:
+                    # Remove any schema prefix from the table name if present
+                    if "." in table_name:
+                        table_name = table_name.split(".")[-1]
+                    # Also remove any quotes from the table name
+                    table_name = table_name.strip('"\'')
+                    
+                    try:
+                        # Fetch the updated table contents
+                        select_query = f'SELECT * FROM "{table_name}"'
+                        cur.execute(select_query)
+                        table_data = [dict(row) for row in cur.fetchall()]
+                        
+                        # Commit changes and close connection
+                        conn.commit()
+                        cur.close()
+                        conn.close()
+                        
+                        return jsonify({
+                            "sql": sql_query,
+                            "rows_affected": rows_affected,
+                            "table_affected": table_name,
+                            "table_data": table_data
+                        })
+                    except Exception as e:
+                        # If we can't get the table data, just return the original response
+                                pass
+                        
+                        # Default case if we couldn't get table data
+                conn.commit()
+                cur.close()
+                conn.close()
+                return jsonify({
+                            "sql": sql_query,
+                            "rows_affected": rows_affected
+                        })
+        except Exception as e:
+                        # Return the SQL with error if execution fails
+                        return jsonify({
+                            "sql": sql_query,
+                            "error": str(e),
+                            "note": "SQL generation succeeded, but execution failed. You may need to modify the query."
+                        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Create a new record
+@app.route("/<string:table_name>", methods=["POST"])
+def create_record(table_name):
+    try:
+        db_url = request.args.get('db_url')
+        if not db_url:
+            return jsonify({"error": "Missing db_url parameter"}), 400
+            
+        data = request.json
+        columns = ", ".join(data.keys())
+        values = ", ".join(["%s"] * len(data))
+        query = f"INSERT INTO {table_name} ({columns}) VALUES ({values}) RETURNING *"
+
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(query, tuple(data.values()))
+        result = dict(cur.fetchone())
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify(result), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# Update a record by primary key
+@app.route("/<string:table_name>/<primary_key_value>", methods=["PUT"])
+def update_record(table_name, primary_key_value):
+    try:
+        db_url = request.args.get('db_url')
+        if not db_url:
+            return jsonify({"error": "Missing db_url parameter"}), 400
+            
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # Get primary key
+        cur.execute(f"SELECT column_name FROM information_schema.key_column_usage WHERE table_name = %s", (table_name,))
+        primary_key = cur.fetchone()
+        if not primary_key:
+            return jsonify({"error": "Primary key not found"}), 400
+        primary_key = primary_key[0]
+
+        data = request.json
+        update_query = ", ".join([f"{key} = %s" for key in data.keys()])
+        query = f"UPDATE {table_name} SET {update_query} WHERE {primary_key} = %s RETURNING *"
+
+        cur.execute(query, tuple(data.values()) + (primary_key_value,))
+        result = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if result:
+            return jsonify(dict(result))
+        return jsonify({"message": "Record not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# Delete a record by primary key
+@app.route("/<string:table_name>/<primary_key_value>", methods=["DELETE"])
+def delete_record(table_name, primary_key_value):
+    try:
+        db_url = request.args.get('db_url')
+        if not db_url:
+            return jsonify({"error": "Missing db_url parameter"}), 400
+            
+        db_config = parse_db_url(db_url)
+        conn = get_db_connection(db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # Get primary key
+        cur.execute(f"SELECT column_name FROM information_schema.key_column_usage WHERE table_name = %s", (table_name,))
+        primary_key = cur.fetchone()
+        if not primary_key:
+            return jsonify({"error": "Primary key not found"}), 400
+        primary_key = primary_key[0]
+
+        query = f"DELETE FROM {table_name} WHERE {primary_key} = %s RETURNING *"
+        cur.execute(query, (primary_key_value,))
+        result = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        if result:
+            return jsonify({"message": "Record deleted"})
+        return jsonify({"message": "Record not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 # Endpoint to process PDFs
 @app.route("/process_pdfs", methods=["POST"])
 def process_pdfs():
