@@ -4,6 +4,7 @@ import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
 import 'package:codeshastra_app/models/block_data.dart';
+import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
 import 'package:codeshastra_app/qr_code.dart';
 import 'package:codeshastra_app/utility/sizedbox_util.dart';
@@ -88,6 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
       'icon': Icons.qr_code,
       'color': 0xFFFFF3C2,
       'keyword': 'bar',
+    },
+    {
+      'title': 'Password Generator',
+      'subtitle': 'Create strong passwords',
+      'icon': Icons.password,
+      'color': 0xFFFFF3C2,
+      'keyword': 'password',
     },
     // {
     //   'title': 'ID card',
@@ -286,8 +294,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: FeatureCard(
                         icon: Icons.document_scanner_outlined,
                         // icon: Icons.crop_outlined,
-                        title: 'Scan',
-                        description: 'Qr code/ barcode generator',
+                        title: 'Scan and Check',
+                        description:
+                            'Qr code/ barcode generator , password generator and check',
                         color: HomeScreen.cardTeal,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
@@ -654,8 +663,13 @@ class ScanOptionsBottomSheet extends StatelessWidget {
                             builder: (context) => BarcodeGenerator(),
                           ),
                         );
-                      } else if (item['keyword'] == 'ai') {
-                        Navigator.pushNamed(context, '/ai');
+                      } else if (item['keyword'] == 'password') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PasswordScreen(),
+                          ),
+                        );
                       }
                     });
                   },

@@ -1,7 +1,9 @@
 import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
+import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
 import 'package:codeshastra_app/home.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
+import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_maker/main_page.dart';
 import 'package:codeshastra_app/pdf_makerr/main_page.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
@@ -12,6 +14,15 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(const MyApp());
 }
+// void main() {
+//   runApp(
+//     // Use Provider for state management
+//     ChangeNotifierProvider(
+//       create: (context) => PasswordProvider(ApiService()),
+//       child: const MyApp(),
+//     ),
+//   );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
