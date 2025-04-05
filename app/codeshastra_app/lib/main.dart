@@ -1,4 +1,6 @@
+import 'package:codeshastra_app/color_palette.dart';
 import 'package:codeshastra_app/home.dart';
+import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
 import 'package:codeshastra_app/razorpay.dart';
 import 'package:flutter/material.dart';
 
@@ -14,9 +16,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: Color(0xffBB86FC),
-        primaryColorDark: Color(0xff121212),
+        primaryColorDark: Color.fromARGB(255, 48, 47, 47),
+        fontFamily: 'SF Pro Display',
         // This is the theme of your application.
         //
         // TRY THIS: Try running your application with "flutter run". You'll see
@@ -34,7 +38,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomeScreen(),
+      home: PdfToolsScreen(), // MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
