@@ -22,6 +22,8 @@ import io
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import base64
+import random
+import uuid
 app = Flask(__name__)
 CORS(app)
 # Ensure temporary directory exists
@@ -132,11 +134,28 @@ def resize_image(input_path, output_path, target_width, target_height, max_size_
         
         print(f"Image resized and saved to {output_path} with size {file_size_kb:.2f} KB")
     os.remove(input_path)
+UPLOAD_FOLDER = 'uploads'
+CONVERTED_FOLDER = 'converted'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-@app.route('/',methods = ['POST'])
+@app.route('/')
 def home():
-    return 'PyPDF-backend'
+    return jsonify({"message": "Excel-CSV Converter API is running!"})
 
+@app.route("/generate-random", methods=["POST"])
+def api_generate_random():
+    data = request.json()
+    start = int(data.get("start", 10))
+    end = int(data.get("end", 100))
+    result = random.randrange(start,end)
+    return jsonify({"random": result})
+@app.route("/generate-uuids", methods=["POST"])
+def api_generate_uuids():
+    data = request.json()
+    num = int(data.get("num", 10))
+    uuids = [str(uuid.uuid4()) for _ in range(num)]
+    return jsonify({"uuids": uuids})
 @app.route('/merge', methods=['POST'])
 def merge():
     ensure_uploads_dir()
@@ -418,7 +437,7 @@ def api_check_password():
 
 @app.route("/ping", methods=["GET"])
 def api_ping():
-    host = request.args.get("host")
+    host = request.json.get("host")
     if not host:
         return jsonify({"error": "No host provided"}), 400
     param = "-n" if platform.system().lower() == "windows" else "-c"
@@ -430,7 +449,7 @@ def api_ping():
 
 @app.route("/dns-lookup", methods=["GET"])
 def api_dns_lookup():
-    domain = request.args.get("domain")
+    domain = request.json.get("domain")
     if not domain:
         return jsonify({"error": "No domain provided"}), 400
     try:
@@ -441,7 +460,7 @@ def api_dns_lookup():
 
 @app.route("/ip-lookup", methods=["GET"])
 def api_ip_lookup():
-    domain = request.args.get("domain")
+    domain = request.json.get("domain")
     if not domain:
         return jsonify({"error": "No domain provided"}), 400
     try:
@@ -452,7 +471,7 @@ def api_ip_lookup():
 
 @app.route("/traceroute", methods=["GET"])
 def api_traceroute():
-    host = request.args.get("host")
+    host = request.json.get("host")
     if not host:
         return jsonify({"error": "No host provided"}), 400
     traceroute_cmd = "tracert" if platform.system().lower() == "windows" else "traceroute"
@@ -473,7 +492,7 @@ def api_generate_barcode():
         filename = "barcode_output"
         barcode_path = barcode_obj.save(filename)
 
-        return send_file(f"{barcode_path}", mimetype='image/png')
+        return send_file(f"D:\\Codeshastra_XI_SleepyHeads\\barcode_output.png", mimetype='image/png')
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
