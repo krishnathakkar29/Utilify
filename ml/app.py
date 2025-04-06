@@ -538,7 +538,39 @@ def process_pdfs():
         return jsonify({"message": "Processing complete"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+@app.route('/summarize', methods=['POST'])
+def summarize_text():
+    # Get request data
+    data = request.json
+    
+    if not data or 'text' not in data:
+        return jsonify({"error": "No text provided"}), 400
+    
+    text = data['text']
+    output_length = data.get('output_length', 100)  # Default to 100 if not specified
+    
+    try:
+        # Initialize the Gemini model
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        # Create prompt with instruction for summary length
+        prompt = f"""
+        Summarize the following text in approximately {output_length} words:
+        
+        {text}
+        """
+        
+        # Generate summary
+        response = model.generate_content(prompt)
+        summary = response.text
+        
+        return jsonify({
+            "summary": summary,
+            "requested_length": output_length
+        })
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 ALLOWED_VOICES = {
     "alloy", "ash", "ballad", "coral", "echo",
     "fable", "onyx", "nova", "sage", "shimmer"
@@ -557,10 +589,10 @@ def generate_speech():
     if voice not in ALLOWED_VOICES:
         return jsonify({"error": f"Invalid voice '{voice}'. Choose from {list(ALLOWED_VOICES)}"}), 400
 
-    try:
+    try:    
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
             with client.audio.speech.with_streaming_response.create(
-                model="gpt-4o",  # Or "tts-1-hd" if preferred
+                model="tts-1",  # Or "tts-1-hd" if preferred
                 voice=voice,
                 input=text
             ) as response:
