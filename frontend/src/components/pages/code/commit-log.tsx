@@ -12,14 +12,15 @@ function CommitLog() {
   const { data: commits, isLoading } = useQuery({
     queryKey: ["commits", currentProject?.id],
     queryFn: async () => {
-      const response = await getCommitByProjectId(
-        "8f637715-6424-47ce-994f-45ca3ee35982"
-      );
+      const response = await getCommitByProjectId(currentProject?.id as string);
       console.log("osndfnason");
       console.log(response);
       return response;
     },
+    refetchInterval: 1000 * 60 * 4, // 5 minutes
   });
+
+  console.log("commits", commits);
 
   if (isLoading) {
     return (
@@ -70,7 +71,9 @@ function CommitLog() {
                     {new Date(commit.commitDate).toLocaleString()}
                   </time>
                 </div>
-                <span className="font-semibold text-black">{commit.commitMessage}</span>
+                <span className="font-semibold text-black">
+                  {commit.commitMessage}
+                </span>
                 <pre className="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-500">
                   {commit.summary}
                 </pre>

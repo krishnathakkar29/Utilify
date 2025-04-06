@@ -40,20 +40,20 @@ const data = {
         },
       ],
     },
-    // {
-    //   title: "DevTryyyy",
-    //   url: "#",
-    //   items: [
-    //     {
-    //       title: "Github",
-    //       url: "/code/developer",
-    //     },
-    //     {
-    //       title: "Current Project",
-    //       url: "/code/developer/current-project",
-    //     },
-    //   ],
-    // },
+    {
+      title: "DevTryyyy",
+      url: "#",
+      items: [
+        {
+          title: "Github",
+          url: "/code/developer",
+        },
+        {
+          title: "Current Project",
+          url: "/code/developer/current-project",
+        },
+      ],
+    },
     {
       title: "Documents",
       url: "#",
@@ -190,8 +190,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       if (!response.success) {
         throw new Error(response.message);
       }
+      console.log(response);
       return response.data;
     },
+    retry: 2,
   });
 
   const { setCurrentProject, currentProject } = useProject();
@@ -215,7 +217,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         {/* Projects Section */}
-        {/* <Collapsible key="projects" defaultOpen className="group/collapsible">
+        <Collapsible key="projects" defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel
               asChild
@@ -285,7 +287,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
-        </Collapsible> */}
+        </Collapsible>
 
         {/* Rest of the sidebar menu */}
         {data.navMain.map((item) => (

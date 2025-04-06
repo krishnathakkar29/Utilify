@@ -32,7 +32,7 @@ export const getCommitHashes = async (
       new Date(a.commit.author.date).getTime()
   ) as any[];
 
-  return sortedCommits.slice(0, 15).map((commit: any) => ({
+  return sortedCommits.slice(0, 2).map((commit: any) => ({
     commitHash: commit.sha as string,
     commitMessage: commit.commit.message ?? "",
     commitAuthorName: commit.commit?.author?.name ?? "",
@@ -44,6 +44,8 @@ export const getCommitHashes = async (
 export const pollRepo = async (githubUrl: string, projectId: string) => {
   try {
     const commitHases = await getCommitHashes(githubUrl);
+    console.log("badsiofdasnfosd commit hashsdf");
+    console.log(commitHases);
     const processedCommits = await prisma.commit.findMany({
       where: {
         projectId: projectId,
@@ -51,7 +53,7 @@ export const pollRepo = async (githubUrl: string, projectId: string) => {
     });
 
     const unprocessedCommits = commitHases.filter(
-      (hash) =>
+      (hash: any) =>
         !processedCommits.some(
           (commit) => commit.commitHash === hash.commitHash
         )
