@@ -16,41 +16,41 @@ export default function DashboardBreadCrumb() {
   const pathToTitle: Record<string, string> = {
     dashboard: "Dashboard",
     documents: "Documents",
-    "csv-excel": "CSV & Excel Functions",
-    "file-hosting": "File Hosting",
-    "document-summarization": "Document Summarization",
-    "query-document": "Query Document",
+    documenthosting: "Cloud in a Minute",
+    excelcsv: "CSV & Excel Conversions",
+    query: "Query Your Documents",
+    pdf: "Pdf Functions",
+    imageconversion: "Image Manipulations",
+    code: "Code And Conquer",
+    compiler: "Web Compiler",
+    formatter: "Formatter",
+    convertor: "Code Language Converter",
+    databaseoperations: "Talk to DataBase",
     work: "Work",
-    "form-builder": "Form Builder",
-    "bulk-email": "Bulk Email Sender",
-    "qr-generator": "QR Generator",
-    "schedule-meetings": "Schedule Meetings",
-    "code-conquer": "Code And Conquer",
-    "code-formatter": "Code Formatter",
-    "web-compiler": "Web Compiler",
-    "json-xml-validator": "JSON XML Validator",
-    "api-tools": "Api Tools",
-    "markdown-editor": "Markdown Editor",
-    security: "Security & Network",
-    "password-generator": "Password Generator",
-    "password-checker": "Password Strength Checker",
-    "random-number": "Random Number Generator",
-    "dns-lookup": "DNS / IP Lookup",
-    "aes-encryptor": "AES Encryptor",
-    tools: "Everyday Tools",
-    "unit-converter": "Unit Converter",
-    "currency-converter": "Currency Converter",
-    "world-clock": "World Clock",
-    "timer-counter": "Timer & Counter",
-    notes: "Notes",
-    "color-palette": "Color Pallete Generator",
-  };
+    mail: "Mail",
+    "send-mail": "OutReact At Ease",
+    "view-history": "Mail History",
+    qrgenerator: "QR & Barcode Generator",
+    todo: "Todo List",
+    everyday: "Everyday Tools",
+    clock: "Converter Utilities",
+    "color-pallete": "Color Pallette At Ease",
+    network: "Network",
+    security: "Security",
+  } as const;
+
   function getPath(i: number): string {
     return "/" + path.slice(0, i + 1).join("/");
   }
+
   function isActive(i: number): boolean {
     return getPath(i) === pathname;
   }
+
+  function getTitleFromPath(p: string): string {
+    return pathToTitle[p as keyof typeof pathToTitle] || p;
+  }
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -63,7 +63,7 @@ export default function DashboardBreadCrumb() {
               )}
             >
               <BreadcrumbLink href={getPath(i)}>
-                {pathToTitle[p]}
+                {getTitleFromPath(p)}
               </BreadcrumbLink>
             </BreadcrumbItem>
             {i !== path.length - 1 && <BreadcrumbSeparator />}
