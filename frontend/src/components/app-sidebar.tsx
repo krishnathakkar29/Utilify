@@ -109,6 +109,10 @@ const data = {
           title: "Coding Assitant",
           url: "/code/codeassistant",
         },
+        {
+          title: "Api Tester",
+          url: "/code/apitester",
+        },
       ],
     },
     {
