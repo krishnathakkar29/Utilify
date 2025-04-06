@@ -1,111 +1,41 @@
-'use client';
+import SubscriptionButton from "@/components/common/subscription-button";
+import Cloud from "@/components/pages/documents/cloud";
+import { Button } from "@/components/ui/button";
+import { checkSubscription } from "@/lib/subscription";
+import { currentUser } from "@clerk/nextjs/server";
+import Link from "next/link";
 
-import React, { useState } from "react";
-import { FileUpload } from "@/components/ui/file-upload";
-import { BACKEND_FLASK_URL } from "@/config/config";
-import { toast, Toaster } from "sonner";
-import { ClipboardCopy } from "lucide-react";
+const page = async () => {
+  const user = await currentUser();
 
-const Page = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [submittedLink, setSubmittedLink] = useState<string | null>(null);
-  const [expiration, setExpiration] = useState<number>(60);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const isPro = await checkSubscription();
 
-  const handleSubmit = async () => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("expiration", expiration.toString());
-
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(`${BACKEND_FLASK_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
-
-      setSubmittedLink(data.presigned_url);
-      toast.success("Presigned URL generated!");
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCopy = () => {
-    if (submittedLink) {
-      navigator.clipboard.writeText(submittedLink);
-      toast.success("Copied to clipboard!");
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-zinc-900 text-white p-6">
-      <Toaster position="top-right" theme="dark" />
-
-      <h1 className="text-2xl font-semibold mb-4 text-center">Cloud File Storage</h1>
-
-      <FileUpload onChange={(files) => setFile(files[0])} />
-
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <label htmlFor="expiration" className="text-sm text-zinc-300">
-          Expiration time (in seconds)
-        </label>
-        <input
-          id="expiration"
-          type="number"
-          min={1}
-          value={expiration}
-          onChange={(e) => setExpiration(Number(e.target.value))}
-          className="px-3 py-2 rounded bg-zinc-800 text-white w-60 text-center"
-        />
-
-        <button
-          onClick={handleSubmit}
-          disabled={!file || loading}
-          className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded disabled:opacity-50"
-        >
-          {loading ? "Uploading..." : "Submit"}
-        </button>
-
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-
-        {submittedLink && (
-          <div className="mt-4 flex flex-col items-center gap-2">
-            <p className="text-green-400">Presigned URL:</p>
-            <div className="flex items-center gap-2">
-              <a
-                href={submittedLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline break-all max-w-md"
-              >
-                {submittedLink}
-              </a>
-              <button
-                onClick={handleCopy}
-                className="p-1 text-white hover:text-green-400"
-              >
-                <ClipboardCopy size={18} />
-              </button>
-            </div>
-          </div>
-        )}
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+        <h1 className="text-3xl font-bold">
+          Please log in to access this page
+        </h1>
+        <Link href="/sign-in">
+          <Button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200">
+            Sign In
+          </Button>
+        </Link>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (!isPro && user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+        <h1 className="text-3xl font-bold">
+          This feature is only available for Pro users.
+        </h1>
+        <SubscriptionButton isPro={isPro} />
+      </div>
+    );
+  }
+  return <Cloud />;
 };
 
-export default Page;
+export default page;

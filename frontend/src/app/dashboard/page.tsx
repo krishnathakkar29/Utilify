@@ -7,11 +7,10 @@
 // export default page;
 "use client";
 
-import React from "react";
-import { LayoutGroup, motion } from "motion/react";
 import { SplashCursor } from "@/components/ui/splash-cursor";
-import { GlowEffect } from "@/components/ui/glow-effect";
 import { TextRotate } from "@/components/ui/text-rotate";
+import { LayoutGroup, motion } from "motion/react";
+import Link from "next/link";
 
 function Page() {
   const cardNames = [
@@ -65,17 +64,34 @@ function Page() {
       {/* Cards Grid */}
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-4">
         {cardNames.map((name, i) => (
-          <div key={i} className="relative h-44 w-64">
-            {/* Optional GlowEffect */}
-            {/* <GlowEffect
+          <Link
+            href={
+              name === "Code"
+                ? "/code/compiler"
+                : name === "Documents"
+                ? "/documents/excelcsv"
+                : name === "Everyday Utilities"
+                ? "/everyday/color-pallete"
+                : name === "Work"
+                ? "/work/qrgenerator"
+                : name === "Network"
+                ? "/network"
+                : "/security"
+            }
+            key={i}
+          >
+            <div className="relative h-44 w-64">
+              {/* Optional GlowEffect */}
+              {/* <GlowEffect
               colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
               mode="static"
               blur="strong"
-            /> */}
-            <div className="relative h-44 w-64 rounded-xl bg-gray/80 text-white p-4 flex items-center justify-center shadow-lg backdrop-blur">
-              {name}
+              /> */}
+              <div className="relative h-44 w-64 rounded-xl bg-gray/80 text-white p-4 flex items-center justify-center shadow-lg backdrop-blur">
+                {name}
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
