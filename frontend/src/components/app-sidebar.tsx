@@ -78,6 +78,10 @@ const data = {
           title: "Image Manipulations",
           url: "/documents/imageconversion",
         },
+        {
+          title: "Image To Text",
+          url: "/documents/ocr",
+        },
       ],
     },
 
@@ -101,6 +105,10 @@ const data = {
           title: "Talk to DataBase",
           url: "/code/databaseoperations",
         },
+        {
+          title: "Coding Assitant",
+          url: "/code/codeassistant",
+        },
       ],
     },
     {
@@ -122,6 +130,10 @@ const data = {
         {
           title: "Todo List",
           url: "/work/todo",
+        },
+        {
+          title: "Text To Speech",
+          url: "/work/tts",
         },
       ],
     },
