@@ -40,39 +40,66 @@ const data = {
         },
       ],
     },
-    {
-      title: "DevTryyyy",
-      url: "#",
-      items: [
-        {
-          title: "Github",
-          url: "/code/developer",
-        },
-        {
-          title: "Current Project",
-          url: "/code/developer/current-project",
-        },
-      ],
-    },
+    // {
+    //   title: "DevTryyyy",
+    //   url: "#",
+    //   items: [
+    //     {
+    //       title: "Github",
+    //       url: "/code/developer",
+    //     },
+    //     {
+    //       title: "Current Project",
+    //       url: "/code/developer/current-project",
+    //     },
+    //   ],
+    // },
     {
       title: "Documents",
       url: "#",
       items: [
         {
-          title: "CSV & Excel Functions",
-          url: "/dashboard",
+          title: "Cloud in a Minute",
+          url: "/documents/documenthosting",
         },
         {
-          title: "File Hosting",
-          url: "/dashboard",
+          title: "CSV & Excel Conversions",
+          url: "/documents/excelcsv",
         },
         {
-          title: "Document Summarization",
-          url: "/dashboard",
+          title: "Query Your Documents",
+          url: "/documents/query",
         },
         {
-          title: "Query Document",
-          url: "/dashboard",
+          title: "Pdf Functions",
+          url: "/documents/pdf",
+        },
+        {
+          title: "Image Manipulations",
+          url: "/documents/imageconversion",
+        },
+      ],
+    },
+
+    {
+      title: "Code And Conquer",
+      url: "#",
+      items: [
+        {
+          title: "Web Compiler",
+          url: "/code/compiler",
+        },
+        {
+          title: "Formatter",
+          url: "/code/formatter",
+        },
+        {
+          title: "Code Language Converter",
+          url: "/code/convertor",
+        },
+        {
+          title: "Talk to DataBase",
+          url: "/code/databaseoperations",
         },
       ],
     },
@@ -81,72 +108,20 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Form Builder",
-          url: "/dashboard",
+          title: "OutReact At Ease",
+          url: "/work/mail/send-mail",
         },
         {
-          title: "Bulk Email Sender",
-          url: "/dashboard",
+          title: "Mail History",
+          url: "/work/mail/view-history",
         },
         {
-          title: "QR Generator",
-          url: "/dashboard",
+          title: "QR & Barcode Generator",
+          url: "/work/qrgenerator",
         },
         {
-          title: "Schedule Meetings",
-          url: "/dashboard",
-        },
-      ],
-    },
-    {
-      title: "Code And Conquer",
-      url: "#",
-      items: [
-        {
-          title: "Code Formatter",
-          url: "/dashboard",
-        },
-        {
-          title: "Web Compiler",
-          url: "/dashboard",
-        },
-        {
-          title: "JSON XML Validator",
-          url: "/dashboard",
-        },
-        {
-          title: "Api Tools",
-          url: "/dashboard",
-        },
-        {
-          title: "Markdown Editor",
-          url: "/dashboard",
-        },
-      ],
-    },
-    {
-      title: "Security & Network",
-      url: "#",
-      items: [
-        {
-          title: "Password Generator",
-          url: "/dashboard",
-        },
-        {
-          title: "Password Strength Checker",
-          url: "/dashboard",
-        },
-        {
-          title: "Random Number Generator",
-          url: "/dashboard",
-        },
-        {
-          title: "DNS / IP Lookup",
-          url: "/dashboard",
-        },
-        {
-          title: "AES Encryptor",
-          url: "/dashboard",
+          title: "Todo List",
+          url: "/work/todo",
         },
       ],
     },
@@ -155,28 +130,26 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Unit Converter",
-          url: "/dashboard",
+          title: "Converter Utilities",
+          url: "/everyday/clock",
         },
         {
-          title: "Currency Converter",
-          url: "/dashboard",
+          title: "Color Pallette At Ease",
+          url: "/everyday/color-pallete",
+        },
+      ],
+    },
+    {
+      title: "Security & Network",
+      url: "#",
+      items: [
+        {
+          title: "Network",
+          url: "/network",
         },
         {
-          title: "World Clock",
-          url: "/dashboard",
-        },
-        {
-          title: "Timer & Counter",
-          url: "/dashboard",
-        },
-        {
-          title: "Notes",
-          url: "/dashboard",
-        },
-        {
-          title: "Color Pallete Generator",
-          url: "/dashboard",
+          title: "Security",
+          url: "/security",
         },
       ],
     },
@@ -226,7 +199,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         {/* Projects Section */}
-        <Collapsible key="projects" defaultOpen className="group/collapsible">
+        {/* <Collapsible key="projects" defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel
               asChild
@@ -296,7 +269,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
-        </Collapsible>
+        </Collapsible> */}
 
         {/* Rest of the sidebar menu */}
         {data.navMain.map((item) => (
