@@ -4,12 +4,14 @@
 
 import 'package:codeshastra_app/audio_converter/audio_converter.dart';
 import 'package:codeshastra_app/barcode_generator.dart';
+import 'package:codeshastra_app/coding_assistant.dart';
 import 'package:codeshastra_app/color_palette.dart';
 import 'package:codeshastra_app/community_page.dart';
 import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
 import 'package:codeshastra_app/image_converter/screens/image_converter_screen.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
 import 'package:codeshastra_app/models/block_data.dart';
+import 'package:codeshastra_app/notes_taking/notes_module.dart';
 import 'package:codeshastra_app/notification.dart';
 import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_qna.dart';
@@ -83,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     },
     {
       'title': 'Image Conversions',
-      'subtitle': 'Convert images in different formats',
+      'subtitle': 'Convert images',
       'icon': Icons.image,
       'color': 0xFFEFEACC,
       'keyword': 'image',
@@ -212,11 +214,11 @@ class _HomeScreenState extends State<HomeScreen> {
       'keyword': 'unit',
     },
     {
-      'title': 'Currency Converter',
-      'subtitle': 'Convert currencies',
-      'icon': Icons.monetization_on_outlined,
+      'title': 'Notes Taking',
+      'subtitle': 'Take notes',
+      'icon': Icons.note_add,
       'color': 0xFFE6F4D8,
-      'keyword': 'curr',
+      'keyword': 'note',
     },
     {
       'title': 'World Clock',
@@ -370,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: const Center(
                                 child: Text(
-                                  '5',
+                                  '4',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -434,7 +436,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.file_copy_outlined,
                         // icon: Icons.document_scanner_outlined,
                         title: 'Convert',
-                        description: 'pdf, jpg, doc, txt,\nxls, ppt',
+                        description:
+                            'Transform files and images effortlessly. ',
                         // title: 'Scan',
                         // description:
                         //     'Documents, ID card,\nMeasure, Count, Passport...',
@@ -458,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // icon: Icons.crop_outlined,
                         title: 'Scan and Check',
                         description:
-                            'Qr code/ barcode generator , password generator and check',
+                            'Generate and verify QR codes/barcodes & passwords.',
                         color: HomeScreen.cardTeal,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
@@ -479,7 +482,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: FeatureCard(
                         icon: Icons.task_alt,
                         title: 'Productivity Tools',
-                        description: 'notes taking,timer,world clock...',
+                        description:
+                            'Stay organized with notes, timers, and more.',
                         color: HomeScreen.cardPink,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
@@ -499,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.extension_outlined,
                         title: 'AI Tools',
                         description:
-                            'Summarize, Finish writing,\nMake shorter, Simplify...',
+                            'Smart assistance for summarizing and editing text.',
                         color: HomeScreen.cardBlue,
                         iconBackgroundColor: Colors.white,
                         onTap: () {
@@ -540,12 +544,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         textColor: Colors.white,
                       ),
                     ),
-                    DocumentThumbnail(
-                      label: 'user-\njourney-01.jpg',
-                      color: HomeScreen.cardTeal,
-                      icon: Icons.image_outlined,
-                      textColor: Colors.white,
-                    ),
+
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -578,6 +577,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         textColor: Colors.white,
                       ),
                     ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CurrencyConverterScreen(),
+                          ),
+                        );
+                      },
+                      child: DocumentThumbnail(
+                        label: 'Currency\nConverter',
+                        color: HomeScreen.cardTeal,
+                        icon: Icons.monetization_on_outlined,
+                        textColor: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 vSize(110),
@@ -591,13 +606,6 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // const SizedBox(width: 30), // Offset to center the FABs
           FloatingActionButton(
-            onPressed: () {},
-            backgroundColor: HomeScreen.accentYellow,
-            heroTag: 'layers',
-            child: const Icon(Icons.layers, color: Colors.black),
-          ),
-          const SizedBox(width: 16),
-          FloatingActionButton(
             onPressed: () {
               Navigator.push(
                 context,
@@ -608,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
             heroTag: 'profile',
             child: const Icon(Icons.person, color: Colors.black),
           ),
-          const SizedBox(width: 160),
+          const SizedBox(width: 16),
           FloatingActionButton(
             onPressed: () {
               Navigator.push(
@@ -619,6 +627,19 @@ class _HomeScreenState extends State<HomeScreen> {
             heroTag: 'addButton',
             backgroundColor: HomeScreen.accentYellow,
             child: const Icon(Icons.add, color: Colors.black),
+          ),
+          const SizedBox(width: 160),
+
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatScreen()),
+              );
+            },
+            backgroundColor: HomeScreen.accentYellow,
+            heroTag: 'layers',
+            child: const Icon(Icons.forum, color: Colors.black),
           ),
         ],
       ),
@@ -958,6 +979,13 @@ class ScanOptionsBottomSheet extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => TextSummarizationScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'note') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotesModule(),
                           ),
                         );
                       }

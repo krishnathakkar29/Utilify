@@ -1,5 +1,6 @@
 import 'package:codeshastra_app/audio_converter/audio_converter.dart';
 import 'package:codeshastra_app/barcode_generator.dart';
+import 'package:codeshastra_app/coding_assistant.dart';
 import 'package:codeshastra_app/color_palette.dart';
 import 'package:codeshastra_app/community_page.dart';
 import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
@@ -38,7 +39,7 @@ import 'package:codeshastra_app/notes_taking/services/notes_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SharedPreferencesHelper.init();
+  await SharedPreferences.getInstance(); // Replace with direct SharedPreferences initialization
   tzdata.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
   runApp(
