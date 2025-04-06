@@ -52,7 +52,7 @@ export async function GET() {
               name: "Learning Journey Pro",
               description: "unlimited course generation!",
             },
-            unit_amount: 2000,
+            unit_amount: 1000,
             recurring: {
               interval: "month",
             },

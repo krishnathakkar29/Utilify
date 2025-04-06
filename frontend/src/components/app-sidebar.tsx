@@ -169,6 +169,24 @@ const data = {
         },
       ],
     },
+    {
+      title: "Settings",
+      url: "#",
+      items: [
+        {
+          title: "Settings",
+          url: "/settings",
+        },
+        {
+          title: "Request Features",
+          url: "/request",
+        },
+        {
+          title: "View Requested Features",
+          url: "/view-features",
+        },
+      ],
+    },
   ],
 };
 
@@ -193,7 +211,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       console.log(response);
       return response.data;
     },
-    retry: 2,
+    retry: 3,
   });
 
   const { setCurrentProject, currentProject } = useProject();
