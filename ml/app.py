@@ -4,8 +4,20 @@ import os
 import random
 import boto3
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+from groq import Groq
+import os
+import base64
+from flask import Flask, request, jsonify
 import tempfile
 from werkzeug.utils import secure_filename
+from flask import Flask, request, send_file, jsonify
+from moviepy import VideoFileClip
+from pydub import AudioSegment
+import os
+import uuid
 from PIL import Image
 import io
 from flask import Flask, request, send_file, jsonify
@@ -42,6 +54,12 @@ from PIL import Image, ImageDraw
 import extcolors
 import math
 import io
+from flask import Flask, request, jsonify
+import base64
+import os
+from mistralai import Mistral
+from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 import base64
@@ -63,6 +81,10 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 import os
+UPLOAD_FOLDER = "uploads"
+PROCESSED_FOLDER = "processed"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 load_dotenv()
 app = Flask(__name__)
@@ -151,8 +173,178 @@ def get_table_names():
         return jsonify({"tables": tables})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+# Initialize Groq client with API key
+client_groq = Groq(api_key=GROQ_API_KEY)
+languages = {
+    'en': 'English',
+    'hi': 'Hindi',
+    'gu': 'Gujarati',
+    'ma': 'Marathi'
+}
+
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0.7
+)
+
+# Updated system prompt with language instruction
+def get_system_prompt(lang='en'):
+    base_prompt = """
+# Coding Assistant Role
+You are an expert AI coding assistant specialized in helping users generate, debug, and optimize code. Your purpose is to provide clear, accurate, and well-explained solutions to coding challenges across multiple programming languages and paradigms.
+
+# Expertise Areas
+- Software design and architecture
+- Algorithm implementation and optimization
+- Language-specific best practices
+- Performance tuning and efficiency improvements
+- Debugging and error resolution
+- Testing and test-driven development
+- Refactoring and code maintenance
+- Security considerations and vulnerabilities
+
+# Response Structure
+For each user query, follow this structure:
+
+## Understanding the Problem
+1. Restate the user's goal or issue to confirm understanding
+2. Identify any unstated assumptions or edge cases to consider
+3. Note any potential constraints or performance requirements
+
+## Solution Approach
+1. Outline your overall approach to solving the problem
+2. Explain why this approach is appropriate for this specific case
+3. Mention alternative approaches if relevant, and why you chose this one
+
+## Code Implementation
+1. Provide complete, runnable code that solves the problem
+2. Include appropriate error handling, input validation, and edge case management
+3. Structure the code with proper organization, naming conventions, and documentation
+
+## Code Explanation
+1. Walk through the implementation line-by-line or section-by-section
+2. Explain the purpose and function of critical components
+3. Highlight any non-obvious or complex logic
+
+## Optimization Insights
+1. Identify performance characteristics (time/space complexity)
+2. Suggest optimizations if the original solution can be improved
+3. Explain the tradeoffs involved in any optimization decisions
+
+## Testing Considerations
+1. Provide example test cases covering typical usage and edge cases
+2. Suggest testing methodologies appropriate for this code
+3. Discuss potential failure modes and how to handle them
+
+## Best Practices
+1. Highlight language-specific idioms and conventions used
+2. Note any design patterns or architectural principles applied
+3. Reference relevant documentation, libraries, or resources for further learning
+
+# Programming Languages
+Demonstrate expertise across popular languages including but not limited to:
+- Python, JavaScript/TypeScript, Java, C#, C/C++, Go, Rust, PHP, Ruby, Swift, Kotlin
+- SQL and database query languages
+- Shell scripting (Bash, PowerShell)
+- Web technologies (HTML, CSS, various JS frameworks)
+
+# Special Instructions
+- When debugging, analyze the error systematically and provide clear explanations for the cause
+- When optimizing, consider both algorithmic improvements and language-specific optimizations
+- When suggesting refactoring, explain the benefits in terms of readability, maintainability, and performance
+- Include meaningful comments in code examples to enhance understanding
+- Support answers with relevant computer science principles and design philosophies
+- Adapt your technical depth to match the apparent expertise level of the user
+- Emphasize not just what to do, but why to do it that way
+
+Question: {question}
+
+Answer:
+"""
+    lang_instruction = f"\nPlease provide all responses in {languages.get(lang, 'English')}."
+    return base_prompt + lang_instruction
+
+@app.route('/code_assistant', methods=['POST'])
+def chat():
+    data = request.json
+    user_query = data.get('query')
+    lang = data.get('language', 'en')  # Default to English if no language specified
+    
+    if not user_query:
+        return jsonify({"error": "Query is required"}), 400
+    
+    if lang not in languages:
+        return jsonify({"error": f"Unsupported language code. Supported codes are: {', '.join(languages.keys())}"}), 400
+    
+    # Combine system prompt with user query
+    messages = [
+        {"role": "system", "content": get_system_prompt(lang)},
+        {"role": "user", "content": user_query}
+    ]
+    
+    try:
+        # Get response from LLM
+        response = llm.invoke(messages)
+        return jsonify({
+            "response": response.content,
+            "language": languages[lang],
+            "status": "success"
+        })
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "status": "error"
+        }), 500
 # Get schema information for all tables
+api_key_mistral = os.environ.get("MISTRAL_API_KEY")
+if not api_key_mistral:
+    raise ValueError("MISTRAL_API_KEY environment variable is not set.")
+
+# Initialize Mistral client_mistral
+client_mistral = Mistral(api_key=api_key_mistral)
+
+def encode_image_file(file_storage):
+    """Encode uploaded image file to base64."""
+    try:
+        return base64.b64encode(file_storage.read()).decode("utf-8")
+    except Exception as e:
+        print(f"Encoding error: {e}")
+        return None
+
+@app.route("/ocr", methods=["POST"])
+def ocr_from_image():
+    if "image" not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+
+    image_file = request.files["image"]
+
+    if image_file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    try:
+        # Secure the filename and encode the image
+        filename = secure_filename(image_file.filename)
+        base64_image = encode_image_file(image_file)
+
+        if not base64_image:
+            return jsonify({"error": "Failed to encode image"}), 500
+
+        # Call Mistral OCR
+        ocr_response = client_mistral.ocr.process(
+            model="mistral-ocr-latest",
+            document={
+                "type": "image_url",
+                "image_url": f"data:image/jpeg;base64,{base64_image}"
+            }
+        )
+        text = "\n".join([page.markdown for page in ocr_response.pages])
+        return jsonify({"text": text})
+
+    except Exception as e:
+        print(f"OCR error: {e}")
+        return jsonify({"error": str(e)}), 500
 @app.route("/schema", methods=["GET"])
 def get_schema():
     try:
@@ -212,6 +404,93 @@ def get_schema():
         return jsonify(schema_info)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+@app.route('/convert_video', methods=['POST'])
+def convert_video():
+    file = request.files.get('file')
+    output_format = request.form.get('format')
+    if not file or not output_format:
+        return jsonify({'error': 'Missing file or output format'}), 400
+    
+    filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[-1]
+    input_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(input_path)
+
+    output_filename = f"{uuid.uuid4()}.{output_format}"
+    output_path = os.path.join(PROCESSED_FOLDER, output_filename)
+
+    clip = VideoFileClip(input_path)
+    clip.write_videofile(output_path)
+
+    return send_file(output_path, as_attachment=True)
+
+
+# --- Trim Video ---
+@app.route('/trim_video', methods=['POST'])
+def trim_video():
+    file = request.files.get('file')
+    start_time = float(request.form.get('start', 0))
+    end_time = float(request.form.get('end', 0))
+
+    if not file:
+        return jsonify({'error': 'Missing file'}), 400
+
+    filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[-1]
+    input_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(input_path)
+
+    output_filename = f"{uuid.uuid4()}.mp4"
+    output_path = os.path.join(PROCESSED_FOLDER, output_filename)
+
+    clip = VideoFileClip(input_path).subclipped(start_time, end_time)
+    clip.write_videofile(output_path)
+
+    return send_file(output_path, as_attachment=True)
+
+
+# --- Audio Conversion ---
+@app.route('/convert_audio', methods=['POST'])
+def convert_audio():
+    file = request.files.get('file')
+    output_format = request.form.get('format')
+
+    if not file or not output_format:
+        return jsonify({'error': 'Missing file or output format'}), 400
+
+    filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[-1]
+    input_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(input_path)
+
+    output_filename = f"{uuid.uuid4()}.{output_format}"
+    output_path = os.path.join(PROCESSED_FOLDER, output_filename)
+
+    audio = AudioSegment.from_file(input_path)
+    audio.export(output_path, format=output_format)
+
+    return send_file(output_path, as_attachment=True)
+
+
+# --- Trim Audio ---
+@app.route('/trim_audio', methods=['POST'])
+def trim_audio():
+    file = request.files.get('file')
+    start_time = int(request.form.get('start', 0))
+    end_time = int(request.form.get('end', 0))
+
+    if not file:
+        return jsonify({'error': 'Missing file'}), 400
+
+    filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[-1]
+    input_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(input_path)
+
+    output_filename = f"{uuid.uuid4()}.mp3"
+    output_path = os.path.join(PROCESSED_FOLDER, output_filename)
+
+    audio = AudioSegment.from_file(input_path)
+    trimmed = audio[start_time:end_time]
+    trimmed.export(output_path, format="mp3")
+
+    return send_file(output_path, as_attachment=True)
 
 # Get all records from a table
 @app.route("/<string:table_name>", methods=["GET"])
