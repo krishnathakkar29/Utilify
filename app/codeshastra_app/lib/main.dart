@@ -1,5 +1,7 @@
+import 'package:codeshastra_app/audio_converter/audio_converter.dart';
 import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
+import 'package:codeshastra_app/community_page.dart';
 import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
 import 'package:codeshastra_app/home.dart';
 import 'package:codeshastra_app/image_converter/screens/image_converter_screen.dart';
@@ -9,6 +11,7 @@ import 'package:codeshastra_app/notes_taking/providers/notes_provider.dart';
 import 'package:codeshastra_app/password_screen.dart';
 import 'package:codeshastra_app/pdf_maker/main_page.dart';
 import 'package:codeshastra_app/pdf_makerr/main_page.dart';
+import 'package:codeshastra_app/pdf_qna.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
 import 'package:codeshastra_app/productivity_tools/countdown_screen.dart';
 import 'package:codeshastra_app/productivity_tools/currency_converter_screen.dart';
@@ -18,9 +21,12 @@ import 'package:codeshastra_app/productivity_tools/timer_screen.dart';
 import 'package:codeshastra_app/productivity_tools/timesheet_screen.dart';
 import 'package:codeshastra_app/productivity_tools/unit_converter_screen.dart';
 import 'package:codeshastra_app/productivity_tools/world_clock.dart';
+import 'package:codeshastra_app/profile/profile_screen.dart';
 import 'package:codeshastra_app/qr_code.dart';
 import 'package:codeshastra_app/random_number_screen.dart';
 import 'package:codeshastra_app/razorpay.dart';
+import 'package:codeshastra_app/text_summarization.dart';
+import 'package:codeshastra_app/tts.dart';
 import 'package:codeshastra_app/uiud_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -85,7 +91,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: NotesModule(), // MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomeScreen(), // MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }

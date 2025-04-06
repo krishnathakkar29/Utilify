@@ -2,14 +2,17 @@
 
 // import 'dart:nativewrappers/_internal/vm/lib/async_patch.dart';
 
+import 'package:codeshastra_app/audio_converter/audio_converter.dart';
 import 'package:codeshastra_app/barcode_generator.dart';
 import 'package:codeshastra_app/color_palette.dart';
+import 'package:codeshastra_app/community_page.dart';
 import 'package:codeshastra_app/excel_to_csv/screens.dart/excet_to_csv.dart';
 import 'package:codeshastra_app/image_converter/screens/image_converter_screen.dart';
 import 'package:codeshastra_app/image_to_pdf.dart';
 import 'package:codeshastra_app/models/block_data.dart';
 import 'package:codeshastra_app/notification.dart';
 import 'package:codeshastra_app/password_screen.dart';
+import 'package:codeshastra_app/pdf_qna.dart';
 import 'package:codeshastra_app/pdf_tools/screens/pdf_tools_screen.dart';
 import 'package:codeshastra_app/productivity_tools/currency_converter_screen.dart';
 import 'package:codeshastra_app/productivity_tools/pomodoro_timer_sheet.dart';
@@ -18,10 +21,15 @@ import 'package:codeshastra_app/productivity_tools/timer_screen.dart';
 import 'package:codeshastra_app/productivity_tools/timesheet_screen.dart';
 import 'package:codeshastra_app/productivity_tools/unit_converter_screen.dart';
 import 'package:codeshastra_app/productivity_tools/world_clock.dart';
+import 'package:codeshastra_app/profile/help_center.dart';
+import 'package:codeshastra_app/profile/profile_screen.dart';
 import 'package:codeshastra_app/qr_code.dart';
 import 'package:codeshastra_app/random_number_screen.dart';
+import 'package:codeshastra_app/text_summarization.dart';
+import 'package:codeshastra_app/tts.dart';
 import 'package:codeshastra_app/uiud_screen.dart';
 import 'package:codeshastra_app/utility/sizedbox_util.dart';
+import 'package:codeshastra_app/video_converter/video_converter.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -233,11 +241,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final ai_tools = [
     {
-      'title': 'Documents',
-      'subtitle': 'Scan multiple documents',
-      'icon': Icons.copy_outlined,
+      'title': 'PDF QnA',
+      'subtitle': 'Process your pdf and ask questions',
+      'icon': Icons.picture_as_pdf,
       'color': 0xFFFFF0D1,
-      'keyword': 'docu',
+      'keyword': 'pdfqna',
+    },
+    {
+      'title': 'Text to Speech',
+      'subtitle': 'Generate speech from input text',
+      'icon': Icons.speaker_notes,
+      'color': 0xFFFFF0D1,
+      'keyword': 'tts',
+    },
+    {
+      'title': 'Text Summarization',
+      'subtitle': 'Give summary for big texts',
+      'icon': Icons.summarize,
+      'color': 0xFFFFF0D1,
+      'keyword': 'summarize',
     },
     // {
     //   'title': 'ID card',
@@ -288,17 +310,27 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                         );
                       },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.question_mark,
-                          size: 20,
-                          color: Colors.white,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HelpCenterScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.question_mark,
+                            size: 20,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -357,10 +389,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  height: 50,
+                  height: 60,
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   child: Row(
                     children: [
@@ -514,17 +546,37 @@ class _HomeScreenState extends State<HomeScreen> {
                       icon: Icons.image_outlined,
                       textColor: Colors.white,
                     ),
-                    DocumentThumbnail(
-                      label: 'Invoice-\noct-2024.doc',
-                      color: HomeScreen.cardPink,
-                      icon: Icons.file_copy_outlined,
-                      textColor: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VideoConverterScreen(),
+                          ),
+                        );
+                      },
+                      child: DocumentThumbnail(
+                        label: 'Video\nConverter',
+                        color: HomeScreen.cardPink,
+                        icon: Icons.video_collection,
+                        textColor: Colors.white,
+                      ),
                     ),
-                    DocumentThumbnail(
-                      label: 'Invoice-\noct-2024.doc',
-                      color: HomeScreen.cardBlue,
-                      icon: Icons.crop_outlined,
-                      textColor: Colors.white,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AudioConverterScreen(),
+                          ),
+                        );
+                      },
+                      child: DocumentThumbnail(
+                        label: 'Audio\nConverter',
+                        color: HomeScreen.cardBlue,
+                        icon: Icons.library_music,
+                        textColor: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -537,7 +589,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(width: 30), // Offset to center the FABs
+          // const SizedBox(width: 30), // Offset to center the FABs
           FloatingActionButton(
             onPressed: () {},
             backgroundColor: HomeScreen.accentYellow,
@@ -546,17 +598,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(width: 16),
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
             backgroundColor: Colors.white60,
             heroTag: 'profile',
             child: const Icon(Icons.person, color: Colors.black),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 160),
           FloatingActionButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ImageToPdfScreen()),
+                MaterialPageRoute(builder: (context) => CommunityPage()),
               );
             },
             heroTag: 'addButton',
@@ -880,6 +937,27 @@ class ScanOptionsBottomSheet extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ImageConverterScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'pdfqna') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PdfChatScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'tts') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TextToSpeechScreen(),
+                          ),
+                        );
+                      } else if (item['keyword'] == 'summarize') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TextSummarizationScreen(),
                           ),
                         );
                       }
