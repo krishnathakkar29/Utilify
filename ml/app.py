@@ -423,7 +423,12 @@ def convert_video():
 
     return send_file(output_path, as_attachment=True)
 
-
+import os
+import uuid
+import asyncio
+from flask import Flask, request, jsonify, send_file, abort
+from pydub import AudioSegment
+from concurrent.futures import ThreadPoolExecutor
 # --- Trim Video ---
 @app.route('/trim_video', methods=['POST'])
 def trim_video():
@@ -468,10 +473,16 @@ def convert_audio():
 
     return send_file(output_path, as_attachment=True)
 
+executor = ThreadPoolExecutor()
 
-# --- Trim Audio ---
+def trim_and_export(input_path, output_path, start, end):
+    audio = AudioSegment.from_file(input_path)
+    trimmed = audio[start:end]
+    trimmed.export(output_path, format="mp3")
+    return output_path
+
 @app.route('/trim_audio', methods=['POST'])
-def trim_audio():
+async def trim_audio():
     file = request.files.get('file')
     start_time = int(request.form.get('start', 0))
     end_time = int(request.form.get('end', 0))
@@ -479,19 +490,61 @@ def trim_audio():
     if not file:
         return jsonify({'error': 'Missing file'}), 400
 
-    filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[-1]
+    filename = f"{uuid.uuid4()}{os.path.splitext(file.filename)[-1]}"
     input_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(input_path)
 
     output_filename = f"{uuid.uuid4()}.mp3"
     output_path = os.path.join(PROCESSED_FOLDER, output_filename)
 
-    audio = AudioSegment.from_file(input_path)
-    trimmed = audio[start_time:end_time]
-    trimmed.export(output_path, format="mp3")
+    try:
+        # Run blocking audio processing in a separate thread
+        await asyncio.get_event_loop().run_in_executor(
+            executor,
+            trim_and_export,
+            input_path,
+            output_path,
+            start_time,
+            end_time
+        )
 
-    return send_file(output_path, as_attachment=True)
+        if not os.path.exists(output_path):
+            raise FileNotFoundError(f"Export failed, file not found at: {output_path}")
 
+        return send_file(output_path, as_attachment=True)
+
+    except Exception as e:
+        print(f"[ERROR] {str(e)}")
+        return jsonify({'error': 'Failed to process audio', 'details': str(e)}), 500
+import time
+@app.route('/api/test', methods=['POST'])
+def api_tester():
+    try:
+        input_data = request.get_json()
+
+        url = input_data.get("url")
+        method = input_data.get("method", "GET").upper()
+        headers = input_data.get("headers", {})
+        data = input_data.get("data", None)
+        token = input_data.get("token", None)
+
+        # Add Bearer token if provided
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+
+        # Measure latency
+        start_time = time.time()
+        response = requests.request(method=method, url=url, headers=headers, json=data)
+        latency = (time.time() - start_time) * 1000  # ms
+
+        return jsonify({
+            "status_code": response.status_code,
+            "response": response.json() if "application/json" in response.headers.get("Content-Type", "") else response.text,
+            "latency_ms": round(latency, 2)
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 # Get all records from a table
 @app.route("/<string:table_name>", methods=["GET"])
 def get_all_records(table_name):
@@ -510,7 +563,6 @@ def get_all_records(table_name):
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-
 # New endpoint to generate SQL based on natural language
 @app.route("/generate-sql", methods=["POST"])
 def generate_sql():
