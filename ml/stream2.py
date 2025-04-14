@@ -18,7 +18,7 @@ def main():
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Merge PDFs", "Split PDF", "Rotate PDF", "Convert Image", "Excel/CSV","Color Palette Extractor"])
     
     # Base URL for the API
-    BASE_URL = "http://localhost:5000"  # Adjust as needed
+    BASE_URL = "https://reception-poultry-ec-booking.trycloudflare.com"  # Adjust as needed
     
     with tab1:
         st.header("Merge PDF Files")

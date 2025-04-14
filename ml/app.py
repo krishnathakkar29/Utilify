@@ -183,12 +183,6 @@ languages = {
     'gu': 'Gujarati',
     'ma': 'Marathi'
 }
-
-llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.7
-)
-
 # Updated system prompt with language instruction
 def get_system_prompt(lang='en'):
     base_prompt = """
@@ -270,8 +264,12 @@ Answer:
 def chat():
     data = request.json
     user_query = data.get('query')
+    model = data.get('model', 'llama-3.3-70b-versatile')
     lang = data.get('language', 'en')  # Default to English if no language specified
-    
+    llm = ChatGroq(
+        model=model,
+        temperature=0.7
+    )
     if not user_query:
         return jsonify({"error": "Query is required"}), 400
     
