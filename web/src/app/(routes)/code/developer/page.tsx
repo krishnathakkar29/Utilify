@@ -7,7 +7,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createProject } from "../../../../../actions/project";
-
 interface FormInput {
   repoUrl: string;
   projectName: string;
@@ -16,7 +15,8 @@ interface FormInput {
 function page() {
   const router = useRouter();
   const { register, handleSubmit, reset } = useForm<FormInput>();
-  const queryClient = useQueryClient(); // Use the existing QueryClient from provider
+
+  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (data: FormInput) => {

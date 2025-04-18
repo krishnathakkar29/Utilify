@@ -22,6 +22,10 @@ import {
 import { ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { getUserProjects } from "../../actions/project";
+import { Project } from "@prisma/client";
+import { useProject } from "@/context/project-context";
+import { useSession } from "next-auth/react";
 
 const data = {
   versions: ["1.0.1"],
@@ -186,39 +190,36 @@ const data = {
   ],
 };
 
-// interface ProjectData {
-//   project: Project;
-//   userId: string;
-//   projectId: string;
-// }
+interface ProjectData {
+  project: Project;
+  userId: string;
+  projectId: string;
+}
 
 export function AppSidebarCompoent({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  //   const {
-  //     data: projects,
-  //     isLoading,
-  //     error,
-  //   } = useQuery<ProjectData[]>({
-  //     queryKey: ["projects"],
-  //     queryFn: async () => {
-  //       const response = await getUserProjects();
-  //       if (!response.success) {
-  //         throw new Error(response.message);
-  //       }
-  //       console.log(response);
-  //       return response.data;
-  //     },
-  //     retry: 3,
-  //   });
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useQuery<ProjectData[]>({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const response = await getUserProjects();
+      if (!response.success) {
+        throw new Error(response.message);
+      }
+      console.log(response);
+      return response.data;
+    },
+  });
 
-  //   const { setCurrentProject, currentProject } = useProject();
+  const { setCurrentProject, currentProject } = useProject();
 
-  //   const handleProjectClick = (projectData: ProjectData) => {
-  //     setCurrentProject(projectData.project);
-  //   };
-
-  //   console.log(currentProject);
+  const handleProjectClick = (projectData: ProjectData) => {
+    setCurrentProject(projectData.project);
+  };
 
   return (
     <Sidebar {...props}>
@@ -247,7 +248,7 @@ export function AppSidebarCompoent({
             <CollapsibleContent>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {/* {isLoading ? (
+                  {isLoading ? (
                     <SidebarMenuItem>
                       <div className="text-sm text-muted-foreground">
                         Loading projects...
@@ -291,7 +292,7 @@ export function AppSidebarCompoent({
                         No projects yet
                       </div>
                     </SidebarMenuItem>
-                  )} */}
+                  )}
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <Link href="/code/developer" className="text-blue-500">

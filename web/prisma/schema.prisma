@@ -44,14 +44,51 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   username      String
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String          @unique
+  emailVerified DateTime?       @map("email_verified")
   password      String
   imageUrl      String?
   accounts      Account[]
   sessions      Session[]
+  UserToProject UserToProject[]
 
   @@map("users")
+}
+
+model Project {
+  id             String          @id @default(uuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  name           String
+  githubUrl      String
+  commits        Commit[]
+  userToProjects UserToProject[]
+}
+
+model UserToProject {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, projectId])
+}
+
+model Commit {
+  id                 String   @id @default(cuid())
+  commitMessage      String
+  commitHash         String
+  commitAuthorName   String
+  commitAuthorAvatar String
+  commitDate         DateTime
+  summary            String
+  projectId          String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  project            Project  @relation(fields: [projectId], references: [id])
 }

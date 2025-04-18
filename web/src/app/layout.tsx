@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import QueryProviderWrapper from "@/components/wrappers/query-provider";
 import { CompilerProvider } from "@/context/compiler-context";
 import { ThemeProvider } from "@/components/wrappers/theme-provider";
+import { ProjectProvider } from "@/context/project-context";
+import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,17 +32,19 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <QueryProviderWrapper>
-          <CompilerProvider>
-            {children}
-            <Toaster
-              position="bottom-right"
-              expand={true}
-              richColors
-              theme="dark"
-              closeButton
-              style={{ marginBottom: "20px" }}
-            />
-          </CompilerProvider>
+          <ProjectProvider>
+            <CompilerProvider>
+              {children}
+              <Toaster
+                position="bottom-right"
+                expand={true}
+                richColors
+                theme="dark"
+                closeButton
+                style={{ marginBottom: "20px" }}
+              />
+            </CompilerProvider>
+          </ProjectProvider>
         </QueryProviderWrapper>
       </body>
     </html>
