@@ -1,9 +1,21 @@
 "use client";
 import Link from "next/link";
 import { Card } from "@/components/landing-card";
-import { SplineScene } from "@/components/ui/spline";
 import { Spotlight } from "@/components/ui/spotlight";
 import AnimatedWordCycle from "@/components/ui/animated-text-cycle";
+import dynamic from "next/dynamic";
+
+const SplineScene = dynamic(
+  () => import("@/components/ui/spline").then((mod) => mod.SplineScene),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="h-12 w-12 animate-spin border-4 border-white border-t-transparent rounded-full"></div>
+      </div>
+    ),
+  }
+);
 
 export default function Page() {
   return (

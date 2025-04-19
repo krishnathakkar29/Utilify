@@ -45,7 +45,7 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Github",
+          title: "Connect to Github Repos",
           url: "/code/developer",
         },
         {
@@ -177,14 +177,14 @@ const data = {
           title: "Settings",
           url: "/settings",
         },
-        {
-          title: "Request Features",
-          url: "/request",
-        },
-        {
-          title: "View Requested Features",
-          url: "/view-features",
-        },
+        // {
+        //   title: "Request Features",
+        //   url: "/request",
+        // },
+        // {
+        //   title: "View Requested Features",
+        //   url: "/view-features",
+        // },
       ],
     },
   ],

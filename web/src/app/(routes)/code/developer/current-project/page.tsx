@@ -9,7 +9,13 @@ function page() {
   const { currentProject } = useProject();
 
   if (!currentProject) {
-    return <div className="text-white">No project selected</div>;
+    return (
+      <div className="text-white">
+        No project selected.
+        <br />
+        Select a project from My Projects form the sidebar
+      </div>
+    );
   }
 
   return (
@@ -17,7 +23,7 @@ function page() {
       <div className="flex items-center">
         <Github />
         <div className="flex items-center justify-center">
-          This project is linked to {" "}
+          This project is linked to{" "}
           <Link
             href={currentProject?.githubUrl ?? ""}
             className="inline-flex items-center hover:underlined text-white"
