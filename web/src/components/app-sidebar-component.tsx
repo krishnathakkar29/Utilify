@@ -119,14 +119,14 @@ const data = {
       title: "Work",
       url: "#",
       items: [
-        {
-          title: "OutReact At Ease",
-          url: "/work/mail/send-mail",
-        },
-        {
-          title: "Mail History",
-          url: "/work/mail/view-history",
-        },
+        // {
+        //   title: "OutReact At Ease",
+        //   url: "/work/mail/send-mail",
+        // },
+        // {
+        //   title: "Mail History",
+        //   url: "/work/mail/view-history",
+        // },
         {
           title: "QR & Barcode Generator",
           url: "/work/qrgenerator",
